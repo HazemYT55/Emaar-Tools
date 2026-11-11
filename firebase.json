@@ -4,11 +4,7 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**",
-      "**/*.exe",
-      "**/*.dll",
-      "**/*.bat",
-      "**/*.apk"
+      "**/node_modules/**"
     ]
   }
 }
