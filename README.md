@@ -8,7 +8,7 @@ The platform is fully deployed and running on Firebase:
 
 ## 🛠️ The 15 Apps
 ### Productivity & Documents
-- 📝 **Emaar Text**: Rich text editor
+- 📝 **Emaar Text**: Rich text editor 
 - 📊 **Emaar Sheet**: Spreadsheet with Excel formulas
 - 🎬 **Emaar Show**: PowerPoint-style presentations
 - 📋 **Emaar Forms**: Form and survey builder
