@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><title>Emaar Posts - منشورات إعمار</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root { --primary: #0f4c81; --bg: #f4f7f9; --border: #e2e8f0; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 600px; background: white; min-height: 100vh; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+    .top-bar { padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 20px; font-weight: 700; color: var(--primary); position: sticky; top: 0; background: white; z-index: 10; }
+    .compose { padding: 20px; border-bottom: 8px solid var(--bg); display: flex; gap: 15px; }
+    .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; }
+    .compose-area { flex: 1; }
+    .compose textarea { width: 100%; border: none; outline: none; resize: none; font-family: 'Cairo'; font-size: 18px; min-height: 80px; }
+    .compose-bottom { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Cairo'; font-weight: 700; cursor: pointer; }
+    .post { padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
+    .post-content { flex: 1; }
+    .post-header { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+    .post-name { font-weight: 700; color: #1e293b; }
+    .post-user { color: #64748b; font-size: 14px; }
+    .post-text { font-size: 15px; line-height: 1.5; color: #1e293b; white-space: pre-wrap; }
+    .post-actions { display: flex; gap: 30px; margin-top: 15px; color: #64748b; }
+    .post-actions i { cursor: pointer; font-size: 18px; }
+    .post-actions i:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">منشورات إعمار (Emaar Posts) 𝕏</div>
+    <div class="compose">
+      <div class="avatar" id="my-avatar">H</div>
+      <div class="compose-area">
+        <textarea id="post-input" placeholder="ماذا يحدث؟"></textarea>
+        <div class="compose-bottom"><button class="btn" onclick="createPost()">نشر</button></div>
+      </div>
+    </div>
+    <div id="feed"></div>
+  </div>
+  <script>
+    let posts = JSON.parse(localStorage.getItem('emaarPosts')) || [];
+    function createPost() {
+      const text = document.getElementById('post-input').value.trim();
+      if (!text) return;
+      posts.unshift({ id: Date.now(), text: text, name: 'Hazem', handle: '@hazem', time: 'الآن' });
+      localStorage.setItem('emaarPosts', JSON.stringify(posts));
+      document.getElementById('post-input').value = '';
+      renderFeed();
+    }
+    function renderFeed() {
+      const feed = document.getElementById('feed');
+      feed.innerHTML = '';
+      posts.forEach(p => {
+        feed.innerHTML += `
+          <div class="post">
+            <div class="avatar">${p.name[0]}</div>
+            <div class="post-content">
+              <div class="post-header">
+                <span class="post-name">${p.name}</span>
+                <span class="post-user">${p.handle} · ${p.time}</span>
+              </div>
+              <div class="post-text">${p.text}</div>
+              <div class="post-actions">
+                <i class="ph ph-chat-circle"></i>
+                <i class="ph ph-repeat"></i>
+                <i class="ph ph-heart"></i>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    renderFeed();
+  </script>
+</body>
+</html>
