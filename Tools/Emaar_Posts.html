@@ -1,78 +1,353 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"><title>Emaar Posts - منشورات إعمار</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X - Emaar Posts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
   <style>
-    :root { --primary: #0f4c81; --bg: #f4f7f9; --border: #e2e8f0; }
+    :root {
+      --bg: #000000;
+      --surface: #16181c;
+      --border: #2f3336;
+      --text-main: #e7e9ea;
+      --text-muted: #71767b;
+      --blue: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --green: #00ba7c;
+      --pink: #f91880;
+    }
     * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 600px; background: white; min-height: 100vh; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-    .top-bar { padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 20px; font-weight: 700; color: var(--primary); position: sticky; top: 0; background: white; z-index: 10; }
-    .compose { padding: 20px; border-bottom: 8px solid var(--bg); display: flex; gap: 15px; }
-    .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; }
+    body { background: var(--bg); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
+
+    /* Main Layout */
+    .app-container { display: flex; width: 100%; max-width: 1200px; }
+    
+    /* Left Sidebar (Desktop) */
+    .sidebar { width: 275px; padding: 10px 20px; border-left: 1px solid var(--border); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+    .x-logo { font-size: 32px; font-weight: 900; padding: 15px; width: fit-content; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+    .x-logo:hover { background: rgba(255,255,255,0.1); }
+    
+    .nav-item { display: flex; align-items: center; gap: 20px; padding: 15px; font-size: 20px; font-weight: 700; border-radius: 30px; cursor: pointer; width: fit-content; margin-bottom: 5px; transition: 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item i { font-size: 28px; }
+    
+    .post-btn { background: var(--text-main); color: black; border: none; padding: 15px; border-radius: 30px; font-size: 17px; font-weight: 700; width: 90%; margin-top: 20px; cursor: pointer; font-family: 'Cairo'; transition: 0.2s; }
+    .post-btn:hover { background: #d7dbdc; }
+
+    .profile-btn { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 30px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
+    .profile-btn:hover { background: rgba(255,255,255,0.1); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+
+    /* Main Feed */
+    .feed-container { flex: 1; border-left: 1px solid var(--border); border-right: 1px solid var(--border); min-height: 100vh; max-width: 600px; }
+    
+    .feed-header { position: sticky; top: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10; }
+    .feed-header h2 { padding: 15px; font-size: 20px; font-weight: 700; }
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: 0.2s; }
+    .tab:hover { background: rgba(255,255,255,0.05); }
+    .tab.active { color: var(--text-main); border-bottom: 4px solid var(--blue); }
+
+    /* Compose Box */
+    .compose-box { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); }
     .compose-area { flex: 1; }
-    .compose textarea { width: 100%; border: none; outline: none; resize: none; font-family: 'Cairo'; font-size: 18px; min-height: 80px; }
-    .compose-bottom { display: flex; justify-content: flex-end; margin-top: 10px; }
-    .btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Cairo'; font-weight: 700; cursor: pointer; }
-    .post { padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; }
+    .compose-area textarea { width: 100%; background: transparent; border: none; color: white; font-size: 20px; resize: none; outline: none; font-family: 'Cairo'; padding-top: 10px; min-height: 50px; }
+    .compose-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 10px; }
+    .compose-icons i { color: var(--blue); font-size: 20px; margin-left: 15px; cursor: pointer; }
+    .reply-btn { background: var(--blue); color: white; border: none; padding: 8px 20px; border-radius: 30px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Cairo'; transition: 0.2s; opacity: 0.5; }
+    .reply-btn.active { opacity: 1; }
+    .reply-btn:hover { background: var(--blue-hover); }
+
+    /* Posts */
+    .post { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+    .post:hover { background: rgba(255,255,255,0.03); }
+    
     .post-content { flex: 1; }
-    .post-header { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-    .post-name { font-weight: 700; color: #1e293b; }
-    .post-user { color: #64748b; font-size: 14px; }
-    .post-text { font-size: 15px; line-height: 1.5; color: #1e293b; white-space: pre-wrap; }
-    .post-actions { display: flex; gap: 30px; margin-top: 15px; color: #64748b; }
-    .post-actions i { cursor: pointer; font-size: 18px; }
-    .post-actions i:hover { color: var(--primary); }
+    .post-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+    .post-name { font-weight: 700; font-size: 15px; }
+    .verified { color: var(--blue); font-size: 16px; }
+    .post-user { color: var(--text-muted); font-size: 15px; }
+    .post-time { color: var(--text-muted); font-size: 15px; }
+    .post-text { font-size: 15px; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
+
+    .post-actions { display: flex; justify-content: space-between; max-width: 425px; margin-top: 10px; }
+    .action { display: flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: 0.2s; }
+    .action i { font-size: 18px; padding: 8px; border-radius: 50%; transition: 0.2s; }
+    
+    .action.reply:hover { color: var(--blue); }
+    .action.reply:hover i { background: rgba(29, 155, 240, 0.1); }
+    
+    .action.repost:hover { color: var(--green); }
+    .action.repost:hover i { background: rgba(0, 186, 124, 0.1); }
+    .action.repost.active { color: var(--green); }
+    
+    .action.like:hover { color: var(--pink); }
+    .action.like:hover i { background: rgba(249, 24, 128, 0.1); }
+    .action.like.active { color: var(--pink); }
+    .action.like.active i { font-weight: bold; }
+
+    /* Right Sidebar (Trends) */
+    .right-sidebar { width: 350px; padding: 10px 20px; position: sticky; top: 0; height: 100vh; }
+    .search-bar { background: var(--surface); border-radius: 30px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .search-bar input { background: transparent; border: none; color: white; outline: none; font-family: 'Cairo'; width: 100%; }
+    
+    .trends-box { background: var(--surface); border-radius: 16px; padding: 15px; margin-bottom: 20px; }
+    .trends-box h3 { font-size: 20px; margin-bottom: 15px; }
+    .trend-item { padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .trend-item:hover { background: rgba(255,255,255,0.05); }
+    .trend-category { font-size: 13px; color: var(--text-muted); }
+    .trend-name { font-weight: 700; font-size: 15px; margin: 2px 0; }
+    .trend-posts { font-size: 13px; color: var(--text-muted); }
+
+    @media (max-width: 1000px) {
+      .sidebar { width: 80px; padding: 10px; align-items: center; }
+      .sidebar .nav-text, .sidebar .post-btn, .profile-btn .user-details { display: none; }
+      .nav-item i { font-size: 26px; }
+      .right-sidebar { display: none; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .feed-container { border: none; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="top-bar">منشورات إعمار (Emaar Posts) 𝕏</div>
-    <div class="compose">
-      <div class="avatar" id="my-avatar">H</div>
-      <div class="compose-area">
-        <textarea id="post-input" placeholder="ماذا يحدث؟"></textarea>
-        <div class="compose-bottom"><button class="btn" onclick="createPost()">نشر</button></div>
+
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+      <div class="x-logo">𝕏</div>
+      
+      <div class="nav-item"><i class="ph ph-house"></i> <span class="nav-text">الرئيسية</span></div>
+      <div class="nav-item"><i class="ph ph-magnifying-glass"></i> <span class="nav-text">استكشاف</span></div>
+      <div class="nav-item"><i class="ph ph-bell"></i> <span class="nav-text">الإشعارات</span></div>
+      <div class="nav-item"><i class="ph ph-envelope-simple"></i> <span class="nav-text">الرسائل</span></div>
+      <div class="nav-item"><i class="ph ph-user"></i> <span class="nav-text">الملف الشخصي</span></div>
+      
+      <button class="post-btn" onclick="focusCompose()">منشور</button>
+      
+      <div class="profile-btn">
+        <div class="avatar" id="my-avatar">H</div>
+        <div class="user-details">
+          <div style="font-weight: 700;" id="my-name">Hazem</div>
+          <div style="color: var(--text-muted); font-size: 14px;" id="my-handle">@HazemYT55</div>
+        </div>
       </div>
     </div>
-    <div id="feed"></div>
+
+    <!-- CENTER FEED -->
+    <div class="feed-container">
+      <div class="feed-header">
+        <h2>الرئيسية</h2>
+        <div class="tabs">
+          <div class="tab active">لك</div>
+          <div class="tab">متابعة</div>
+        </div>
+      </div>
+
+      <!-- Compose Area -->
+      <div class="compose-box">
+        <div class="avatar" id="compose-avatar">H</div>
+        <div class="compose-area">
+          <textarea id="post-input" placeholder="ماذا يحدث؟!" oninput="checkInput()"></textarea>
+          <div class="compose-bottom">
+            <div class="compose-icons">
+              <i class="ph ph-image"></i>
+              <i class="ph ph-gif"></i>
+              <i class="ph ph-list-dashes"></i>
+              <i class="ph ph-smiley"></i>
+              <i class="ph ph-calendar-blank"></i>
+              <i class="ph ph-map-pin"></i>
+            </div>
+            <button class="reply-btn" id="post-btn" onclick="createPost()">نشر</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts Feed -->
+      <div id="feed">
+        <!-- Posts injected via JS -->
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR (Trends) -->
+    <div class="right-sidebar">
+      <div class="search-bar">
+        <i class="ph ph-magnifying-glass" style="color:var(--text-muted); font-size:20px;"></i>
+        <input type="text" placeholder="بحث">
+      </div>
+      
+      <div class="trends-box">
+        <h3>الأحداث الرائجة</h3>
+        <div class="trend-item">
+          <div class="trend-category">التقنية · الترند</div>
+          <div class="trend-name">#EmaarTools</div>
+          <div class="trend-posts">15.4 ألف منشور</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-category">البرمجة · الترند</div>
+          <div class="trend-name">#Firebase</div>
+          <div class="trend-posts">8,201 منشور</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-category">الترند في السعودية</div>
+          <div class="trend-name">#Hazem</div>
+          <div class="trend-posts">4,109 منشور</div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
   <script>
-    let posts = JSON.parse(localStorage.getItem('emaarPosts')) || [];
-    function createPost() {
-      const text = document.getElementById('post-input').value.trim();
-      if (!text) return;
-      posts.unshift({ id: Date.now(), text: text, name: 'Hazem', handle: '@hazem', time: 'الآن' });
-      localStorage.setItem('emaarPosts', JSON.stringify(posts));
-      document.getElementById('post-input').value = '';
-      renderFeed();
+    // Initial Dummy Data for the "For You" feed
+    let posts = JSON.parse(localStorage.getItem('xPosts')) || [
+      {
+        id: 1,
+        name: "إعمار الخليج",
+        handle: "@EmaarGulf",
+        verified: true,
+        time: "2س",
+        text: "يسرنا الإعلان عن إطلاق منصة Emaar Tools الداخلية الجديدة! 15 أداة متكاملة في مكان واحد. 🚀\n\n#EmaarTools #Tech",
+        likes: 342,
+        reposts: 89,
+        replies: 24,
+        isLiked: false,
+        isReposted: false
+      },
+      {
+        id: 2,
+        name: "Hazem",
+        handle: "@HazemYT55",
+        verified: true,
+        time: "4س",
+        text: "قمت ببرمجة الـ AI المحلي اليوم. يعمل بدون إنترنت تماماً وبدون API Key! 🤯\nهل أنتم مستعدون لتجربته؟",
+        likes: 1200,
+        reposts: 305,
+        replies: 84,
+        isLiked: true,
+        isReposted: false
+      }
+    ];
+
+    const feed = document.getElementById('feed');
+    const textarea = document.getElementById('post-input');
+    const postBtn = document.getElementById('post-btn');
+
+    // Auto-resize textarea
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    function checkInput() {
+      if (textarea.value.trim().length > 0) {
+        postBtn.classList.add('active');
+      } else {
+        postBtn.classList.remove('active');
+      }
     }
-    function renderFeed() {
-      const feed = document.getElementById('feed');
+
+    function focusCompose() {
+      textarea.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000) return (num / 1000).toFixed(1) + ' ألف';
+      return num;
+    }
+
+    function renderPosts() {
       feed.innerHTML = '';
       posts.forEach(p => {
-        feed.innerHTML += `
+        const postHTML = `
           <div class="post">
-            <div class="avatar">${p.name[0]}</div>
+            <div class="avatar">${p.name.charAt(0).toUpperCase()}</div>
             <div class="post-content">
               <div class="post-header">
                 <span class="post-name">${p.name}</span>
-                <span class="post-user">${p.handle} · ${p.time}</span>
+                ${p.verified ? '<i class="ph-fill ph-seal-check verified"></i>' : ''}
+                <span class="post-user">${p.handle}</span>
+                <span class="post-time">· ${p.time}</span>
               </div>
               <div class="post-text">${p.text}</div>
               <div class="post-actions">
-                <i class="ph ph-chat-circle"></i>
-                <i class="ph ph-repeat"></i>
-                <i class="ph ph-heart"></i>
+                <div class="action reply">
+                  <i class="ph ph-chat-circle"></i> <span>${formatNumber(p.replies)}</span>
+                </div>
+                <div class="action repost ${p.isReposted ? 'active' : ''}" onclick="toggleRepost(${p.id})">
+                  <i class="ph ph-repeat"></i> <span>${formatNumber(p.reposts)}</span>
+                </div>
+                <div class="action like ${p.isLiked ? 'active' : ''}" onclick="toggleLike(${p.id})">
+                  <i class="${p.isLiked ? 'ph-fill' : 'ph'} ph-heart"></i> <span>${formatNumber(p.likes)}</span>
+                </div>
+                <div class="action">
+                  <i class="ph ph-chart-bar"></i> <span>${formatNumber(Math.floor(p.likes / 10))}</span>
+                </div>
+                <div class="action">
+                  <i class="ph ph-upload-simple"></i>
+                </div>
               </div>
             </div>
           </div>
         `;
+        feed.innerHTML += postHTML;
       });
     }
-    renderFeed();
+
+    function createPost() {
+      const text = textarea.value.trim();
+      if (!text) return;
+      
+      const newPost = {
+        id: Date.now(),
+        name: "Hazem",
+        handle: "@HazemYT55",
+        verified: true,
+        time: "الآن",
+        text: text,
+        likes: 0,
+        reposts: 0,
+        replies: 0,
+        isLiked: false,
+        isReposted: false
+      };
+      
+      posts.unshift(newPost);
+      localStorage.setItem('xPosts', JSON.stringify(posts));
+      
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      postBtn.classList.remove('active');
+      renderPosts();
+    }
+
+    function toggleLike(id) {
+      const post = posts.find(p => p.id === id);
+      if (post) {
+        post.isLiked = !post.isLiked;
+        post.likes += post.isLiked ? 1 : -1;
+        localStorage.setItem('xPosts', JSON.stringify(posts));
+        renderPosts();
+      }
+    }
+
+    function toggleRepost(id) {
+      const post = posts.find(p => p.id === id);
+      if (post) {
+        post.isReposted = !post.isReposted;
+        post.reposts += post.isReposted ? 1 : -1;
+        localStorage.setItem('xPosts', JSON.stringify(posts));
+        renderPosts();
+      }
+    }
+
+    // Initialize Feed
+    renderPosts();
   </script>
 </body>
 </html>
