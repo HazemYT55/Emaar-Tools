@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><title>Emaar Notes - الملاحظات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root { --bg: #f4f7f9; --primary: #0f4c81; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+    .top-bar { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; color: var(--primary); font-size: 20px; font-weight: 700; }
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: 600; }
+    .board { flex: 1; padding: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-content: flex-start; overflow-y: auto; }
+    .note { width: 250px; min-height: 250px; background: #fef08a; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; transition: 0.2s; }
+    .note:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
+    .note textarea { flex: 1; background: transparent; border: none; resize: none; outline: none; font-family: 'Cairo'; font-size: 16px; line-height: 1.5; color: #1e293b; }
+    .note .del-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px; opacity: 0.5; }
+    .note:hover .del-btn { opacity: 1; }
+    .colors { display: flex; gap: 10px; margin-top: 10px; }
+    .color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <span>🗒️ ملاحظات إعمار (Emaar Notes)</span>
+    <button class="btn" onclick="addNote()">+ ملاحظة جديدة</button>
+  </div>
+  <div class="board" id="board"></div>
+  <script>
+    const colors = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa'];
+    let notes = JSON.parse(localStorage.getItem('emaarNotes')) || [];
+
+    function addNote() {
+      notes.push({ id: Date.now(), text: '', color: colors[Math.floor(Math.random() * colors.length)] });
+      saveAndRender();
+    }
+
+    function deleteNote(id) {
+      if (!confirm('حذف هذه الملاحظة؟')) return;
+      notes = notes.filter(n => n.id !== id);
+      saveAndRender();
+    }
+
+    function updateNote(id, text) {
+      const note = notes.find(n => n.id === id);
+      if (note) { note.text = text; saveLocally(); }
+    }
+
+    function changeColor(id, color) {
+      const note = notes.find(n => n.id === id);
+      if (note) { note.color = color; saveAndRender(); }
+    }
+
+    function saveLocally() {
+      localStorage.setItem('emaarNotes', JSON.stringify(notes));
+    }
+
+    function saveAndRender() {
+      saveLocally();
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      notes.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'note';
+        div.style.background = n.color;
+        div.innerHTML = `
+          <button class="del-btn" onclick="deleteNote(${n.id})"><i class="ph ph-trash"></i></button>
+          <textarea placeholder="اكتب ملاحظتك هنا..." oninput="updateNote(${n.id}, this.value)">${n.text}</textarea>
+          <div class="colors">
+            ${colors.map(c => `<div class="color-dot" style="background:${c}" onclick="changeColor(${n.id}, '${c}')"></div>`).join('')}
+          </div>
+        `;
+        board.appendChild(div);
+      });
+    }
+
+    saveAndRender();
+  </script>
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emaar Calc - آلة حاسبة إعمار</title>
+  <link rel="icon" href="data:,">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --primary-light: #e0f2fe;
+      --accent: #d4af37;
+      --bg: #f4f7f9;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --btn-bg: #f8fafc;
+      --btn-hover: #e2e8f0;
+      --danger: #ef4444;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --btn-bg: #334155;
+      --btn-hover: #475569;
+      --primary-light: #1e3a8a;
+    }
+
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      background: var(--surface);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .brand img { height: 35px; border-radius: 6px; }
+    [data-theme="dark"] .brand { color: var(--text-main); }
+
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+      transition: 0.2s;
+    }
+    .theme-toggle:hover { background: var(--btn-bg); }
+
+    /* LAYOUT */
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .calc-container {
+      background: var(--surface);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: var(--btn-bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1;
+      padding: 14px 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+    }
+    .tab:hover { color: var(--text-main); }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--surface);
+    }
+    [data-theme="dark"] .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* SCREENS */
+    .screen { display: none; padding: 20px; }
+    .screen.active { display: block; }
+
+    /* DISPLAY */
+    .display {
+      background: var(--bg);
+      border-radius: 16px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      text-align: left;
+      direction: ltr;
+    }
+    .history {
+      font-size: 14px;
+      color: var(--text-muted);
+      min-height: 20px;
+      word-wrap: break-word;
+    }
+    .result {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-main);
+      word-wrap: break-word;
+      overflow-x: auto;
+    }
+
+    /* KEYPAD */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .keypad.scientific {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .btn {
+      background: var(--btn-bg);
+      color: var(--text-main);
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      font-family: 'Cairo', sans-serif;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn:hover { background: var(--btn-hover); }
+    .btn:active { transform: scale(0.95); }
+
+    .btn.op { color: var(--primary); background: var(--primary-light); }
+    [data-theme="dark"] .btn.op { color: var(--accent); background: #1e293b; }
+    
+    .btn.eq { background: var(--primary); color: white; }
+    .btn.eq:hover { background: #0d3f6b; }
+
+    .btn.clear { color: var(--danger); background: #fee2e2; }
+    [data-theme="dark"] .btn.clear { background: #451a1a; }
+    
+    .btn.sci { font-size: 14px; padding: 12px; }
+
+    /* CONVERTER */
+    .conv-group { margin-bottom: 15px; }
+    .conv-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; color: var(--text-muted); }
+    .conv-row { display: flex; gap: 10px; }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text-main);
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--primary); }
+
+    .swap-btn {
+      background: var(--primary-light); color: var(--primary);
+      border: none; width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; margin: 10px auto; font-size: 18px;
+    }
+    [data-theme="dark"] .swap-btn { background: var(--btn-bg); color: var(--text-main); }
+
+    .currency-info { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="brand">
+      <img src="../../assets/logo.jpg" alt="Emaar Logo" onerror="this.style.display='none'">
+      آلة حاسبة إعمار (Emaar Calc) 🧮
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="تغيير المظهر">
+      <i class="ph ph-moon" id="theme-icon"></i>
+    </button>
+  </div>
+
+  <div class="workspace">
+    <div class="calc-container">
+      
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('standard', this)">عادي</div>
+        <div class="tab" onclick="switchTab('scientific', this)">علمي</div>
+        <div class="tab" onclick="switchTab('converter', this)">محول</div>
+      </div>
+
+      <!-- STANDARD CALCULATOR -->
+      <div class="screen active" id="screen-standard">
+        <div class="display">
+          <div class="history" id="history-std"></div>
+          <div class="result" id="result-std">0</div>
+        </div>
+        <div class="keypad">
+          <button class="btn clear" onclick="clearCalc('std')">C</button>
+          <button class="btn" onclick="backspace('std')"><i class="ph ph-backspace"></i></button>
+          <button class="btn op" onclick="appendPercent('std')">%</button>
+          <button class="btn op" onclick="appendOp('std', '/')">÷</button>
+
+          <button class="btn" onclick="appendNum('std', '7')">7</button>
+          <button class="btn" onclick="appendNum('std', '8')">8</button>
+          <button class="btn" onclick="appendNum('std', '9')">9</button>
+          <button class="btn op" onclick="appendOp('std', '*')">×</button>
+
+          <button class="btn" onclick="appendNum('std', '4')">4</button>
+          <button class="btn" onclick="appendNum('std', '5')">5</button>
+          <button class="btn" onclick="appendNum('std', '6')">6</button>
+          <button class="btn op" onclick="appendOp('std', '-')">-</button>
+
+          <button class="btn" onclick="appendNum('std', '1')">1</button>
+          <button class="btn" onclick="appendNum('std', '2')">2</button>
+          <button class="btn" onclick="appendNum('std', '3')">3</button>
+          <button class="btn op" onclick="appendOp('std', '+')">+</button>
+
+          <button class="btn" style="grid-column: span 2;" onclick="appendNum('std', '0')">0</button>
+          <button class="btn" onclick="appendNum('std', '.')">.</button>
+          <button class="btn eq" onclick="calculate('std')">=</button>
+        </div>
+      </div>
+
+      <!-- SCIENTIFIC CALCULATOR -->
+      <div class="screen" id="screen-scientific">
+        <div class="display">
+          <div class="history" id="history-sci"></div>
+          <div class="result" id="result-sci">0</div>
+        </div>
+        <div class="keypad scientific">
+          <button class="btn sci" onclick="appendSci('sin(')">sin</button>
+          <button class="btn sci" onclick="appendSci('cos(')">cos</button>
+          <button class="btn sci" onclick="appendSci('tan(')">tan</button>
+          <button class="btn sci" onclick="appendSci('log(')">log</button>
+          <button class="btn clear" onclick="clearCalc('sci')">C</button>
+
+          <button class="btn sci" onclick="appendSci('√(')">√</button>
+          <button class="btn sci" onclick="appendSci('^')">x^y</button>
+          <button class="btn sci" onclick="appendSci('(')">(</button>
+          <button class="btn sci" onclick="appendSci(')')">)</button>
+          <button class="btn op" onclick="appendOp('sci', '/')">÷</button>
+
+          <button class="btn" onclick="appendNum('sci', '7')">7</button>
+          <button class="btn" onclick="appendNum('sci', '8')">8</button>
+          <button class="btn" onclick="appendNum('sci', '9')">9</button>
+          <button class="btn op" onclick="appendOp('sci', '*')">×</button>
+          <button class="btn op" onclick="appendOp('sci', '-')">-</button>
+
+          <button class="btn" onclick="appendNum('sci', '4')">4</button>
+          <button class="btn" onclick="appendNum('sci', '5')">5</button>
+          <button class="btn" onclick="appendNum('sci', '6')">6</button>
+          <button class="btn op" onclick="appendOp('sci', '+')">+</button>
+          <button class="btn eq" onclick="calculate('sci')" style="grid-row: span 2;">=</button>
+
+          <button class="btn" onclick="appendNum('sci', '1')">1</button>
+          <button class="btn" onclick="appendNum('sci', '2')">2</button>
+          <button class="btn" onclick="appendNum('sci', '3')">3</button>
+          <button class="btn" onclick="appendNum('sci', '0')">0</button>
+          <button class="btn" onclick="appendNum('sci', '.')">.</button>
+        </div>
+      </div>
+
+      <!-- CONVERTER -->
+      <div class="screen" id="screen-converter">
+        <div class="tabs" style="background:transparent; border:none; margin-bottom:10px; padding:0;">
+          <div class="tab active" style="padding:8px; font-size:12px;" onclick="switchConv('length', this)">الطول</div>
+          <div class="tab" style="padding:8px; font-size:12px;" onclick="switchConv('weight', this)">الوزن</div>
+          <div class="tab" style="padding:8px; font-size:12px;" onclick="switchConv('temp', this)">الحرارة</div>
+          <div class="tab" style="padding:8px; font-size:12px;" onclick="switchConv('currency', this)">العملة</div>
+        </div>
+
+        <!-- LENGTH -->
+        <div id="conv-length" class="conv-content">
+          <div class="conv-group">
+            <label>من</label>
+            <div class="conv-row">
+              <input type="number" id="len-in" class="form-control" value="1" oninput="convertLength()">
+              <select id="len-from" class="form-control" onchange="convertLength()">
+                <option value="m">متر</option>
+                <option value="km">كيلومتر</option>
+                <option value="cm">سنتيمتر</option>
+                <option value="mi">ميل</option>
+                <option value="ft">قدم</option>
+              </select>
+            </div>
+          </div>
+          <button class="swap-btn" onclick="swapLen()"><i class="ph ph-arrows-down-up"></i></button>
+          <div class="conv-group">
+            <label>إلى</label>
+            <div class="conv-row">
+              <input type="number" id="len-out" class="form-control" readonly>
+              <select id="len-to" class="form-control" onchange="convertLength()">
+                <option value="km">كيلومتر</option>
+                <option value="m">متر</option>
+                <option value="cm">سنتيمتر</option>
+                <option value="mi">ميل</option>
+                <option value="ft">قدم</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEIGHT -->
+        <div id="conv-weight" class="conv-content" style="display:none;">
+          <div class="conv-group">
+            <label>من</label>
+            <div class="conv-row">
+              <input type="number" id="wt-in" class="form-control" value="1" oninput="convertWeight()">
+              <select id="wt-from" class="form-control" onchange="convertWeight()">
+                <option value="kg">كيلوجرام</option>
+                <option value="g">جرام</option>
+                <option value="lb">باوند</option>
+                <option value="oz">أونصة</option>
+              </select>
+            </div>
+          </div>
+          <button class="swap-btn" onclick="swapWt()"><i class="ph ph-arrows-down-up"></i></button>
+          <div class="conv-group">
+            <label>إلى</label>
+            <div class="conv-row">
+              <input type="number" id="wt-out" class="form-control" readonly>
+              <select id="wt-to" class="form-control" onchange="convertWeight()">
+                <option value="lb">باوند</option>
+                <option value="kg">كيلوجرام</option>
+                <option value="g">جرام</option>
+                <option value="oz">أونصة</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPERATURE -->
+        <div id="conv-temp" class="conv-content" style="display:none;">
+          <div class="conv-group">
+            <label>من</label>
+            <div class="conv-row">
+              <input type="number" id="temp-in" class="form-control" value="0" oninput="convertTemp()">
+              <select id="temp-from" class="form-control" onchange="convertTemp()">
+                <option value="C">مئوية (C)</option>
+                <option value="F">فهرنهايت (F)</option>
+                <option value="K">كلفن (K)</option>
+              </select>
+            </div>
+          </div>
+          <button class="swap-btn" onclick="swapTemp()"><i class="ph ph-arrows-down-up"></i></button>
+          <div class="conv-group">
+            <label>إلى</label>
+            <div class="conv-row">
+              <input type="number" id="temp-out" class="form-control" readonly>
+              <select id="temp-to" class="form-control" onchange="convertTemp()">
+                <option value="F">فهرنهايت (F)</option>
+                <option value="C">مئوية (C)</option>
+                <option value="K">كلفن (K)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- CURRENCY -->
+        <div id="conv-currency" class="conv-content" style="display:none;">
+          <div class="conv-group">
+            <label>من</label>
+            <div class="conv-row">
+              <input type="number" id="cur-in" class="form-control" value="1" oninput="convertCurrency()">
+              <select id="cur-from" class="form-control" onchange="convertCurrency()">
+                <option value="USD">USD - دولار أمريكي</option>
+                <option value="SAR">SAR - ريال سعودي</option>
+                <option value="EGP">EGP - جنيه مصري</option>
+                <option value="AED">AED - درهم إماراتي</option>
+                <option value="EUR">EUR - يورو</option>
+                <option value="GBP">GBP - جنيه إسترليني</option>
+              </select>
+            </div>
+          </div>
+          <button class="swap-btn" onclick="swapCur()"><i class="ph ph-arrows-down-up"></i></button>
+          <div class="conv-group">
+            <label>إلى</label>
+            <div class="conv-row">
+              <input type="number" id="cur-out" class="form-control" readonly>
+              <select id="cur-to" class="form-control" onchange="convertCurrency()">
+                <option value="SAR">SAR - ريال سعودي</option>
+                <option value="USD">USD - دولار أمريكي</option>
+                <option value="EGP">EGP - جنيه مصري</option>
+                <option value="AED">AED - درهم إماراتي</option>
+                <option value="EUR">EUR - يورو</option>
+                <option value="GBP">GBP - جنيه إسترليني</option>
+              </select>
+            </div>
+          </div>
+          <div class="currency-info" id="currency-status">جاري جلب أسعار الصرف...</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       THEME MANAGEMENT
+       ============================================================ */
+    const themeIcon = document.getElementById('theme-icon');
+    const currentTheme = localStorage.getItem('emaarCalcTheme') || 'light';
+    
+    if (currentTheme === 'dark') {
+      document.body.setAttribute('data-theme', 'dark');
+      themeIcon.className = 'ph ph-sun';
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('emaarCalcTheme', 'light');
+        themeIcon.className = 'ph ph-moon';
+      } else {
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('emaarCalcTheme', 'dark');
+        themeIcon.className = 'ph ph-sun';
+      }
+    }
+
+    /* ============================================================
+       TABS & SCREENS
+       ============================================================ */
+    function switchTab(tabName, el) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${tabName}`).classList.add('active');
+      
+      document.querySelectorAll('.tabs:first-child .tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function switchConv(convName, el) {
+      document.querySelectorAll('.conv-content').forEach(c => c.style.display = 'none');
+      document.getElementById(`conv-${convName}`).classList.add('active');
+      document.getElementById(`conv-${convName}`).style.display = 'block';
+      
+      el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    /* ============================================================
+       CALCULATOR LOGIC
+       ============================================================ */
+    let calcState = {
+      std: { current: '0', history: '' },
+      sci: { current: '0', history: '' }
+    };
+
+    function updateDisplay(mode) {
+      document.getElementById(`result-${mode}`).innerText = calcState[mode].current;
+      document.getElementById(`history-${mode}`).innerText = calcState[mode].history;
+    }
+
+    function appendNum(mode, num) {
+      let c = calcState[mode].current;
+      if (c === '0' && num !== '.') c = num;
+      else if (num === '.' && c.includes('.')) return;
+      else c += num;
+      calcState[mode].current = c;
+      updateDisplay(mode);
+    }
+
+    function appendOp(mode, op) {
+      let c = calcState[mode].current;
+      if (c.endsWith('+') || c.endsWith('-') || c.endsWith('*') || c.endsWith('/')) {
+        c = c.slice(0, -1) + op;
+      } else {
+        c += op;
+      }
+      calcState[mode].current = c;
+      updateDisplay(mode);
+    }
+
+    function appendSci(val) {
+      let c = calcState['sci'].current;
+      if (c === '0') c = val;
+      else c += val;
+      calcState['sci'].current = c;
+      updateDisplay('sci');
+    }
+
+    function appendPercent(mode) {
+      let c = calcState[mode].current;
+      try {
+        let match = c.match(/([0-9.]+)$/);
+        if (match) {
+          let val = parseFloat(match[1]) / 100;
+          c = c.replace(match[1], val);
+          calcState[mode].current = c;
+          updateDisplay(mode);
+        }
+      } catch (e) {}
+    }
+
+    function clearCalc(mode) {
+      calcState[mode] = { current: '0', history: '' };
+      updateDisplay(mode);
+    }
+
+    function backspace(mode) {
+      let c = calcState[mode].current;
+      if (c.length > 1) c = c.slice(0, -1);
+      else c = '0';
+      calcState[mode].current = c;
+      updateDisplay(mode);
+    }
+
+    function calculate(mode) {
+      let expr = calcState[mode].current;
+      
+      // Prepare for math evaluation
+      let evalExpr = expr
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/')
+        .replace(/√/g, 'Math.sqrt')
+        .replace(/sin\(/g, 'Math.sin(')
+        .replace(/cos\(/g, 'Math.cos(')
+        .replace(/tan\(/g, 'Math.tan(')
+        .replace(/log\(/g, 'Math.log10(')
+        .replace(/\^/g, '**');
+
+      try {
+        // Safe evaluation
+        let result = new Function('return ' + evalExpr)();
+        
+        if (!isFinite(result) || isNaN(result)) throw new Error('Math Error');
+        
+        // Round long decimals
+        result = Math.round(result * 100000000) / 100000000;
+
+        calcState[mode].history = expr + ' =';
+        calcState[mode].current = result.toString();
+        updateDisplay(mode);
+      } catch (e) {
+        calcState[mode].current = 'خطأ';
+        updateDisplay(mode);
+        setTimeout(() => clearCalc(mode), 1500);
+      }
+    }
+
+    /* ============================================================
+       CONVERTER LOGIC
+       ============================================================ */
+    // Length
+    const lengthRates = { m: 1, km: 1000, cm: 0.01, mi: 1609.34, ft: 0.3048 };
+    function convertLength() {
+      const val = parseFloat(document.getElementById('len-in').value) || 0;
+      const from = document.getElementById('len-from').value;
+      const to = document.getElementById('len-to').value;
+      document.getElementById('len-out').value = (val * lengthRates[from] / lengthRates[to]).toFixed(4);
+    }
+    function swapLen() {
+      const f = document.getElementById('len-from');
+      const t = document.getElementById('len-to');
+      const temp = f.value; f.value = t.value; t.value = temp;
+      convertLength();
+    }
+
+    // Weight
+    const weightRates = { kg: 1, g: 0.001, lb: 0.453592, oz: 0.0283495 };
+    function convertWeight() {
+      const val = parseFloat(document.getElementById('wt-in').value) || 0;
+      const from = document.getElementById('wt-from').value;
+      const to = document.getElementById('wt-to').value;
+      document.getElementById('wt-out').value = (val * weightRates[from] / weightRates[to]).toFixed(4);
+    }
+    function swapWt() {
+      const f = document.getElementById('wt-from');
+      const t = document.getElementById('wt-to');
+      const temp = f.value; f.value = t.value; t.value = temp;
+      convertWeight();
+    }
+
+    // Temperature
+    function convertTemp() {
+      const val = parseFloat(document.getElementById('temp-in').value) || 0;
+      const from = document.getElementById('temp-from').value;
+      const to = document.getElementById('temp-to').value;
+      let c = 0;
+
+      // Convert to Celsius first
+      if (from === 'C') c = val;
+      else if (from === 'F') c = (val - 32) * 5/9;
+      else if (from === 'K') c = val - 273.15;
+
+      // Convert from Celsius to target
+      let out = 0;
+      if (to === 'C') out = c;
+      else if (to === 'F') out = (c * 9/5) + 32;
+      else if (to === 'K') out = c + 273.15;
+
+      document.getElementById('temp-out').value = out.toFixed(2);
+    }
+    function swapTemp() {
+      const f = document.getElementById('temp-from');
+      const t = document.getElementById('temp-to');
+      const temp = f.value; f.value = t.value; t.value = temp;
+      convertTemp();
+    }
+
+    // Currency (Live API)
+    let currencyRates = null;
+    async function fetchCurrencyRates() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        currencyRates = data.rates;
+        document.getElementById('currency-status').innerText = `آخر تحديث: ${new Date(data.time_last_update_unix * 1000).toLocaleDateString('ar-EG')} (شكراً لـ exchangerate-api.com)`;
+        convertCurrency();
+      } catch (e) {
+        document.getElementById('currency-status').innerText = 'تعذر جلب الأسعار. تحقق من اتصالك بالإنترنت.';
+      }
+    }
+
+    function convertCurrency() {
+      if (!currencyRates) return;
+      const val = parseFloat(document.getElementById('cur-in').value) || 0;
+      const from = document.getElementById('cur-from').value;
+      const to = document.getElementById('cur-to').value;
+      
+      const usdVal = val / currencyRates[from];
+      const result = usdVal * currencyRates[to];
+      document.getElementById('cur-out').value = result.toFixed(2);
+    }
+    function swapCur() {
+      const f = document.getElementById('cur-from');
+      const t = document.getElementById('cur-to');
+      const temp = f.value; f.value = t.value; t.value = temp;
+      convertCurrency();
+    }
+
+    // Initialize currency on load
+    fetchCurrencyRates();
+
+    /* ============================================================
+       KEYBOARD SUPPORT FOR STANDARD CALC
+       ============================================================ */
+    document.addEventListener('keydown', (e) => {
+      const activeScreen = document.querySelector('.screen.active').id;
+      if (activeScreen !== 'screen-standard' && activeScreen !== 'screen-scientific') return;
+      
+      const mode = activeScreen === 'screen-standard' ? 'std' : 'sci';
+
+      if (/[0-9.]/.test(e.key)) {
+        appendNum(mode, e.key);
+      } else if (['+', '-', '*', '/'].includes(e.key)) {
+        appendOp(mode, e.key);
+      } else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        calculate(mode);
+      } else if (e.key === 'Backspace') {
+        backspace(mode);
+      } else if (e.key === 'Escape') {
+        clearCalc(mode);
+      }
+    });
+
+  </script>
+</body>
+</html>

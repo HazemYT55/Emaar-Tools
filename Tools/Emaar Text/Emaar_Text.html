@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emaar Text - محرر النصوص</title>
+  <link rel="icon" href="data:,">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --accent: #d4af37;
+      --bg: #f4f7f9;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --toolbar-bg: #f8fafc;
+    }
+
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      background: var(--surface);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand img {
+      height: 35px;
+      border-radius: 6px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: #0d3f6b; transform: translateY(-1px); }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-outline:hover { background: #e0f2fe; color: var(--primary); }
+
+    /* Editor Container */
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--toolbar-bg);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 2px;
+      border-left: 1px solid var(--border);
+      padding-left: 8px;
+      margin-left: 5px;
+    }
+    .toolbar-group:last-child {
+      border-left: none;
+      padding-left: 0;
+      margin-left: 0;
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--text-main);
+      transition: 0.2s;
+    }
+
+    .tool-btn:hover { background: #e2e8f0; }
+    .tool-btn.active { background: #cbd5e1; color: var(--primary); }
+
+    .color-picker {
+      border: none;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      padding: 0;
+      background: transparent;
+    }
+
+    /* Actual Writing Area */
+    #editor {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 0 12px 12px;
+      padding: 30px;
+      font-size: 16px;
+      line-height: 1.8;
+      outline: none;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* Placeholder for empty editor */
+    #editor:empty:before {
+      content: "ابدأ الكتابة هنا... (Start typing here)";
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+    }
+
+    @media (max-width: 600px) {
+      .top-bar { flex-direction: column; gap: 10px; }
+      .editor-container { padding: 10px; }
+      #editor { padding: 15px; }
+      .toolbar { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="brand">
+      <img src="../../assets/logo.jpg" alt="Emaar Logo" onerror="this.style.display='none'">
+      محرر نصوص إعمار (Emaar Text) 📝
+    </div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="openFile()">
+        <i class="ph ph-folder-open"></i> فتح
+      </button>
+      <button class="btn" onclick="saveFile()">
+        <i class="ph ph-floppy-disk"></i> حفظ كملف نصي
+      </button>
+    </div>
+  </div>
+
+  <!-- Editor Main Area -->
+  <div class="editor-container">
+    
+    <!-- Toolbar -->
+    <div class="toolbar">
+      
+      <!-- Undo / Redo -->
+      <div class="toolbar-group">
+        <button class="tool-btn" onclick="formatDoc('undo')" title="تراجع"><i class="ph ph-arrow-u-up-left"></i></button>
+        <button class="tool-btn" onclick="formatDoc('redo')" title="إعادة"><i class="ph ph-arrow-u-up-right"></i></button>
+      </div>
+
+      <!-- Font Formatting -->
+      <div class="toolbar-group">
+        <button class="tool-btn" onclick="formatDoc('bold')" title="عريض"><i class="ph ph-text-b"></i></button>
+        <button class="tool-btn" onclick="formatDoc('italic')" title="مائل"><i class="ph ph-text-italic"></i></button>
+        <button class="tool-btn" onclick="formatDoc('underline')" title="تسطير"><i class="ph ph-text-underline"></i></button>
+        <button class="tool-btn" onclick="formatDoc('strikeThrough')" title="شطب"><i class="ph ph-text-strikethrough"></i></button>
+      </div>
+
+      <!-- Alignment -->
+      <div class="toolbar-group">
+        <button class="tool-btn" onclick="formatDoc('justifyRight')" title="محاذاة لليمين"><i class="ph ph-text-align-right"></i></button>
+        <button class="tool-btn" onclick="formatDoc('justifyCenter')" title="توسيط"><i class="ph ph-text-align-center"></i></button>
+        <button class="tool-btn" onclick="formatDoc('justifyLeft')" title="محاذاة لليسار"><i class="ph ph-text-align-left"></i></button>
+        <button class="tool-btn" onclick="formatDoc('justifyFull')" title="ضبط"><i class="ph ph-text-align-justify"></i></button>
+      </div>
+
+      <!-- Lists -->
+      <div class="toolbar-group">
+        <button class="tool-btn" onclick="formatDoc('insertOrderedList')" title="قائمة مرقمة"><i class="ph ph-list-numbers"></i></button>
+        <button class="tool-btn" onclick="formatDoc('insertUnorderedList')" title="قائمة نقطية"><i class="ph ph-list-bullets"></i></button>
+      </div>
+
+      <!-- Color -->
+      <div class="toolbar-group">
+        <input type="color" class="color-picker" onchange="formatDoc('foreColor', this.value)" title="لون النص" value="#0f4c81">
+        <input type="color" class="color-picker" onchange="formatDoc('hiliteColor', this.value)" title="لون التظليل" value="#ffff00">
+      </div>
+
+      <!-- Clear -->
+      <div class="toolbar-group">
+        <button class="tool-btn" onclick="formatDoc('removeFormat')" title="إزالة التنسيق"><i class="ph ph-eraser"></i></button>
+      </div>
+    </div>
+
+    <!-- The actual typing area -->
+    <div id="editor" contenteditable="true"></div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span id="word-count">عدد الكلمات: 0</span>
+      <span>Emaar Text v1.0</span>
+    </div>
+  </div>
+
+  <!-- Hidden inputs for file loading/saving -->
+  <input type="file" id="file-input" accept=".txt, .html" style="display: none;" onchange="loadFile(event)">
+
+  <script>
+    const editor = document.getElementById('editor');
+    const wordCount = document.getElementById('word-count');
+
+    // Core formatting function
+    function formatDoc(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+      editor.focus();
+      updateWordCount();
+    }
+
+    // Update word count
+    function updateWordCount() {
+      const text = editor.innerText || '';
+      const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+      wordCount.innerText = `عدد الكلمات: ${words}`;
+    }
+
+    editor.addEventListener('input', updateWordCount);
+
+    // Save as TXT file (Plain Text)
+    function saveFile() {
+      const text = editor.innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Emaar_Text_${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Open file
+    function openFile() {
+      document.getElementById('file-input').click();
+    }
+
+    function loadFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        if (file.name.endsWith('.html')) {
+          editor.innerHTML = e.target.result;
+        } else {
+          // For .txt files, preserve line breaks
+          editor.innerText = e.target.result;
+        }
+        updateWordCount();
+      };
+      reader.readAsText(file);
+      event.target.value = ''; // Reset input
+    }
+
+    // Handle keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+U)
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey) {
+        if (e.key === 'b') { e.preventDefault(); formatDoc('bold'); }
+        if (e.key === 'i') { e.preventDefault(); formatDoc('italic'); }
+        if (e.key === 'u') { e.preventDefault(); formatDoc('underline'); }
+        if (e.key === 's') { e.preventDefault(); saveFile(); }
+      }
+    });
+  </script>
+</body>
+</html>

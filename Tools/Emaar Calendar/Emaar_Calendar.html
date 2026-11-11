@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><title>Emaar Calendar - التقويم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root { --primary: #0f4c81; --bg: #f4f7f9; --surface: #fff; --border: #e2e8f0; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+    .top-bar { background: var(--surface); padding: 15px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); color: var(--primary); font-size: 20px; font-weight: 700; }
+    .main { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; }
+    .calendar-box { flex: 2; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header h2 { color: var(--primary); }
+    .btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; }
+    .day-name { text-align: center; font-weight: 700; color: var(--primary); padding: 10px; }
+    .day { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer; position: relative; display: flex; flex-direction: column; align-items: center; }
+    .day:hover { background: #e0f2fe; }
+    .day.today { background: #e0f2fe; border-color: var(--primary); }
+    .day-num { font-weight: bold; font-size: 16px; }
+    .event-dot { width: 6px; height: 6px; background: red; border-radius: 50%; margin-top: 5px; }
+    .sidebar { flex: 1; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar h3 { margin-bottom: 15px; color: var(--primary); }
+    input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Cairo'; }
+  </style>
+</head>
+<body>
+  <div class="top-bar"><i class="ph ph-calendar"></i> تقويم إعمار (Emaar Calendar)</div>
+  <div class="main">
+    <div class="calendar-box">
+      <div class="header">
+        <button class="btn" onclick="prevMonth()">السابق</button>
+        <h2 id="month-display">يناير 2026</h2>
+        <button class="btn" onclick="nextMonth()">التالي</button>
+      </div>
+      <div class="grid" id="calendar-grid">
+        <!-- Days injected by JS -->
+      </div>
+    </div>
+    <div class="sidebar">
+      <h3 id="selected-date">اختر يوماً</h3>
+      <input type="text" id="event-title" placeholder="اسم الحدث/المناسبة...">
+      <button class="btn" onclick="addEvent()">إضافة حدث</button>
+      <div id="events-list" style="margin-top: 20px;">
+        <!-- Events injected by JS -->
+      </div>
+    </div>
+  </div>
+  <script>
+    let currentDate = new Date();
+    let selectedDateStr = "";
+    let events = JSON.parse(localStorage.getItem('emaarCalEvents')) || {};
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      document.getElementById('month-display').innerText = currentDate.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+      
+      const daysAr = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+      daysAr.forEach(d => grid.innerHTML += `<div class="day-name">${d}</div>`);
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dStr = `${year}-${month + 1}-${i}`;
+        const isToday = new Date().toDateString() === new Date(year, month, i).toDateString();
+        const hasEvents = events[dStr] && events[dStr].length > 0;
+        
+        grid.innerHTML += `
+          <div class="day ${isToday ? 'today' : ''}" onclick="selectDay('${dStr}')">
+            <span class="day-num">${i}</span>
+            ${hasEvents ? '<div class="event-dot"></div>' : ''}
+          </div>
+        `;
+      }
+    }
+
+    function selectDay(dStr) {
+      selectedDateStr = dStr;
+      document.getElementById('selected-date').innerText = `أحداث يوم: ${dStr}`;
+      renderEvents();
+    }
+
+    function addEvent() {
+      if (!selectedDateStr) return alert('اختر يوماً أولاً');
+      const title = document.getElementById('event-title').value.trim();
+      if (!title) return;
+      if (!events[selectedDateStr]) events[selectedDateStr] = [];
+      events[selectedDateStr].push(title);
+      localStorage.setItem('emaarCalEvents', JSON.stringify(events));
+      document.getElementById('event-title').value = '';
+      renderCalendar();
+      renderEvents();
+    }
+
+    function renderEvents() {
+      const list = document.getElementById('events-list');
+      list.innerHTML = '';
+      if (events[selectedDateStr]) {
+        events[selectedDateStr].forEach((ev, i) => {
+          list.innerHTML += `<div style="padding:10px; background:#f1f5f9; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between;">
+            <span>${ev}</span>
+            <button onclick="deleteEvent(${i})" style="color:red; border:none; background:none; cursor:pointer;">✕</button>
+          </div>`;
+        });
+      }
+    }
+
+    function deleteEvent(idx) {
+      events[selectedDateStr].splice(idx, 1);
+      localStorage.setItem('emaarCalEvents', JSON.stringify(events));
+      renderCalendar();
+      renderEvents();
+    }
+
+    function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
+    function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
+
+    renderCalendar();
+  </script>
+</body>
+</html>

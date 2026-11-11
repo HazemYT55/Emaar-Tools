@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emaar Show - عروض إعمار</title>
+  <link rel="icon" href="data:,">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --accent: #d4af37;
+      --bg: #f4f7f9;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --toolbar-bg: #f8fafc;
+      --danger: #ef4444;
+      --slide-ratio: 16 / 9;
+    }
+
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--text-main);
+    }
+
+    /* ---------- TOP BAR ---------- */
+    .top-bar {
+      background: var(--surface);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      z-index: 10;
+      flex-shrink: 0;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .brand img { height: 35px; border-radius: 6px; }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #0d3f6b; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-outline:hover { background: #e0f2fe; color: var(--primary); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .btn-danger:hover { background: #fee2e2; color: var(--danger); }
+
+    .btn-accent { background: var(--accent); color: #1e293b; }
+    .btn-accent:hover { background: #c9a52f; }
+
+    /* ---------- LAYOUT ---------- */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ---------- SLIDES SIDEBAR ---------- */
+    .slides-sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .sidebar-header .mini-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-header .mini-btn:hover { background: #0d3f6b; }
+
+    .slides-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slide-thumb {
+      aspect-ratio: var(--slide-ratio);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: white;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .slide-thumb:hover { border-color: #94a3b8; }
+    .slide-thumb.active { border-color: var(--primary); box-shadow: 0 0 0 2px #e0f2fe; }
+
+    .slide-thumb-num {
+      position: absolute;
+      bottom: 3px;
+      right: 5px;
+      font-size: 10px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.85);
+      padding: 0 4px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    .thumb-preview {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-origin: top right;
+    }
+
+    .thumb-preview .mini-el {
+      position: absolute;
+      font-size: 3px;
+      overflow: hidden;
+      line-height: 1.2;
+      padding: 1px;
+    }
+
+    /* ---------- MAIN CANVAS ---------- */
+    .canvas-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #e2e8f0;
+      min-width: 0;
+    }
+
+    .toolbar-insert {
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 15px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .toolbar-insert .sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      color: var(--text-main);
+      transition: 0.15s;
+    }
+    .tool-btn:hover { background: #e2e8f0; }
+    .tool-btn i { font-size: 16px; }
+
+    .canvas-scroll {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      min-height: 0;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      aspect-ratio: var(--slide-ratio);
+      width: 100%;
+      max-width: 960px;
+      max-height: 100%;
+      background: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .slide-canvas {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* ---------- SLIDE ELEMENTS ---------- */
+    .slide-el {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      border: 1px solid transparent;
+      min-width: 20px;
+      min-height: 20px;
+    }
+    .slide-el:hover { border-color: rgba(15, 76, 129, 0.4); }
+    .slide-el.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .slide-el.selected::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: -6px;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border: 2px solid white;
+      border-radius: 50%;
+      cursor: nwse-resize;
+    }
+
+    .slide-el.text-el {
+      padding: 6px 8px;
+      outline: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .slide-el.text-el:focus {
+      cursor: text;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .slide-el.shape-el { border: none; }
+
+    .slide-el.img-el img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      display: block;
+      border-radius: inherit;
+    }
+
+    /* ---------- INSPECTOR ---------- */
+    .inspector {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .inspector-section {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inspector-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .inspector-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .inspector-row label { color: var(--text-muted); flex-shrink: 0; }
+
+    .inspector-row input[type="color"] {
+      width: 40px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+      padding: 0;
+    }
+
+    .inspector-row input[type="number"] {
+      width: 70px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .inspector-row input[type="range"] { flex: 1; }
+
+    .empty-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 15px 5px;
+      line-height: 1.6;
+    }
+
+    .save-indicator {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-right: auto;
+      padding-right: 8px;
+    }
+    .save-indicator.saved { color: #16a34a; }
+
+    /* ---------- PRESENT MODE ---------- */
+    .present-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .present-overlay.active { display: flex; }
+
+    .present-slide-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .present-slide {
+      aspect-ratio: var(--slide-ratio);
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      background: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(255,255,255,0.1);
+    }
+
+    .present-controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10000;
+    }
+    .present-overlay:hover .present-controls { opacity: 1; }
+
+    .present-controls button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .present-controls button:hover { background: rgba(255,255,255,0.2); }
+    .present-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .present-hint {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      color: rgba(255,255,255,0.8);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10000;
+    }
+    .present-overlay:hover .present-hint { opacity: 1; }
+
+    /* ---------- MOBILE ---------- */
+    @media (max-width: 900px) {
+      .inspector { display: none; }
+      .slides-sidebar { width: 140px; }
+    }
+    @media (max-width: 600px) {
+      .slides-sidebar { display: none; }
+      .top-bar { padding: 8px 10px; }
+      .brand { font-size: 14px; }
+      .btn { padding: 6px 10px; font-size: 11px; }
+      .canvas-scroll { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <div class="top-bar">
+    <div class="brand">
+      <img src="../../assets/logo.jpg" alt="Emaar Logo" onerror="this.style.display='none'">
+      عروض إعمار (Emaar Show) 🎬
+    </div>
+    <div class="save-indicator" id="save-indicator"></div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="newDeck()" title="عرض جديد">
+        <i class="ph ph-file-plus"></i> جديد
+      </button>
+      <button class="btn btn-outline" onclick="triggerImport()" title="استيراد عرض">
+        <i class="ph ph-upload-simple"></i> استيراد
+      </button>
+      <button class="btn btn-outline" onclick="exportJSON()" title="تصدير كملف JSON">
+        <i class="ph ph-download-simple"></i> تصدير
+      </button>
+      <button class="btn" onclick="saveNow()" title="حفظ في المتصفح">
+        <i class="ph ph-floppy-disk"></i> حفظ
+      </button>
+      <button class="btn btn-accent" onclick="startPresenting()" title="عرض من الشريحة الحالية">
+        <i class="ph ph-play"></i> عرض
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== WORKSPACE ==================== -->
+  <div class="workspace">
+
+    <!-- Slides Sidebar -->
+    <aside class="slides-sidebar">
+      <div class="sidebar-header">
+        <span>الشرائح (<span id="slide-count">0</span>)</span>
+        <button class="mini-btn" onclick="addSlide()" title="شريحة جديدة">+</button>
+      </div>
+      <div class="slides-list" id="slides-list"></div>
+    </aside>
+
+    <!-- Canvas -->
+    <main class="canvas-area">
+
+      <!-- Insert Toolbar -->
+      <div class="toolbar-insert">
+        <button class="tool-btn" onclick="insertElement('text')">
+          <i class="ph ph-text-t"></i> نص
+        </button>
+        <button class="tool-btn" onclick="insertElement('rect')">
+          <i class="ph ph-rectangle"></i> مستطيل
+        </button>
+        <button class="tool-btn" onclick="insertElement('circle')">
+          <i class="ph ph-circle"></i> دائرة
+        </button>
+        <div class="sep"></div>
+        <button class="tool-btn" onclick="triggerImageUpload()">
+          <i class="ph ph-image"></i> صورة
+        </button>
+        <div class="sep"></div>
+        <button class="tool-btn" onclick="duplicateSlide()" title="تكرار الشريحة">
+          <i class="ph ph-copy"></i> تكرار
+        </button>
+        <button class="tool-btn" onclick="deleteSlide()" title="حذف الشريحة" style="color: var(--danger);">
+          <i class="ph ph-trash"></i> حذف
+        </button>
+        <div class="sep"></div>
+        <button class="tool-btn" onclick="moveSlide(-1)" title="تحريك لأعلى">
+          <i class="ph ph-arrow-up"></i>
+        </button>
+        <button class="tool-btn" onclick="moveSlide(1)" title="تحريك لأسفل">
+          <i class="ph ph-arrow-down"></i>
+        </button>
+      </div>
+
+      <!-- Canvas Scroll -->
+      <div class="canvas-scroll">
+        <div class="canvas-wrapper">
+          <div class="slide-canvas" id="slide-canvas"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Inspector -->
+    <aside class="inspector">
+      <div class="inspector-section">
+        <div class="inspector-title">خلفية الشريحة</div>
+        <div class="inspector-row">
+          <label>اللون</label>
+          <input type="color" id="slide-bg-color" value="#ffffff" onchange="setSlideBg(this.value)">
+        </div>
+      </div>
+
+      <div class="inspector-section" id="element-inspector">
+        <div class="inspector-title">العنصر المحدد</div>
+        <div id="element-props">
+          <div class="empty-hint">اختر عنصراً من الشريحة لتعديل خصائصه.</div>
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <div class="inspector-title">معلومات</div>
+        <div class="inspector-row">
+          <label>الشريحة</label>
+          <span id="current-slide-label" style="font-weight:700;color:var(--primary);">1 / 1</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Hidden inputs -->
+  <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+  <input type="file" id="json-input" accept=".json" style="display: none;" onchange="handleJSONImport(event)">
+
+  <!-- ==================== PRESENT MODE ==================== -->
+  <div class="present-overlay" id="present-overlay">
+    <div class="present-hint">اضغط ← → للتنقل · Esc للخروج</div>
+    <div class="present-slide-wrap">
+      <div class="present-slide" id="present-slide"></div>
+    </div>
+    <div class="present-controls">
+      <button id="present-prev" onclick="presentNav(-1)"><i class="ph ph-caret-right"></i></button>
+      <span id="present-counter">1 / 1</span>
+      <button id="present-next" onclick="presentNav(1)"><i class="ph ph-caret-left"></i></button>
+      <button onclick="stopPresenting()" title="خروج"><i class="ph ph-x"></i></button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       EMAR SHOW - Phase 1
+       Data model:
+         deck = {
+           slides: [
+             { id, bg, elements: [ {id, type, x, y, w, h, content, style} ] }
+           ]
+         }
+       Coordinates are in % (0-100) relative to slide canvas.
+       ============================================================ */
+
+    const STORAGE_KEY = 'emaarShowDeck';
+    let deck = { slides: [] };
+    let currentSlideIndex = 0;
+    let selectedElementId = null;
+    let autosaveTimer = null;
+
+    /* ---------- UTILITIES ---------- */
+    function uid() { return 'el_' + Math.random().toString(36).substr(2, 9); }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function debounceSave() {
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => saveNow(true), 800);
+    }
+
+    /* ---------- DECK INIT ---------- */
+    function newSlideData() {
+      return { id: uid(), bg: '#ffffff', elements: [] };
+    }
+
+    function loadDeck() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.slides && parsed.slides.length) {
+            deck = parsed;
+            return;
+          }
+        }
+      } catch (e) { console.error('Load failed:', e); }
+      deck = { slides: [newSlideData()] };
+    }
+
+    /* ---------- RENDER: SLIDE SIDEBAR ---------- */
+    function renderSlidesList() {
+      const list = document.getElementById('slides-list');
+      list.innerHTML = '';
+      deck.slides.forEach((slide, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'slide-thumb' + (idx === currentSlideIndex ? ' active' : '');
+        thumb.onclick = () => selectSlide(idx);
+
+        const preview = document.createElement('div');
+        preview.className = 'thumb-preview';
+        preview.style.background = slide.bg;
+
+        slide.elements.forEach(el => {
+          const mini = document.createElement('div');
+          mini.className = 'mini-el';
+          mini.style.left = el.x + '%';
+          mini.style.top = el.y + '%';
+          mini.style.width = el.w + '%';
+          mini.style.height = el.h + '%';
+
+          if (el.type === 'text') {
+            mini.innerText = el.content || '';
+            mini.style.color = el.style?.color || '#000';
+            mini.style.fontWeight = el.style?.bold ? 'bold' : 'normal';
+          } else if (el.type === 'rect' || el.type === 'circle') {
+            mini.style.background = el.style?.fill || '#0f4c81';
+            mini.style.borderRadius = el.type === 'circle' ? '50%' : '0';
+          } else if (el.type === 'image') {
+            mini.style.background = '#e2e8f0';
+            mini.style.backgroundImage = el.content ? `url(${el.content})` : 'none';
+            mini.style.backgroundSize = 'cover';
+          }
+          preview.appendChild(mini);
+        });
+
+        const num = document.createElement('div');
+        num.className = 'slide-thumb-num';
+        num.textContent = idx + 1;
+
+        thumb.appendChild(preview);
+        thumb.appendChild(num);
+        list.appendChild(thumb);
+      });
+
+      document.getElementById('slide-count').textContent = deck.slides.length;
+      document.getElementById('current-slide-label').textContent =
+        `${currentSlideIndex + 1} / ${deck.slides.length}`;
+    }
+
+    /* ---------- RENDER: CANVAS ---------- */
+    function renderCanvas() {
+      const slide = deck.slides[currentSlideIndex];
+      if (!slide) return;
+
+      const canvas = document.getElementById('slide-canvas');
+      canvas.style.background = slide.bg;
+      canvas.innerHTML = '';
+
+      document.getElementById('slide-bg-color').value = slide.bg;
+
+      slide.elements.forEach(el => {
+        canvas.appendChild(buildElementNode(el, false));
+      });
+
+      // Re-apply selection
+      if (selectedElementId) {
+        const node = canvas.querySelector(`[data-id="${selectedElementId}"]`);
+        if (node) node.classList.add('selected');
+        else selectedElementId = null;
+      }
+      renderInspector();
+    }
+
+    function buildElementNode(el, forPresentation) {
+      const node = document.createElement('div');
+      node.className = 'slide-el';
+      node.dataset.id = el.id;
+      node.style.left = el.x + '%';
+      node.style.top = el.y + '%';
+      node.style.width = el.w + '%';
+      node.style.height = el.h + '%';
+
+      if (el.type === 'text') {
+        node.classList.add('text-el');
+        node.contentEditable = forPresentation ? 'false' : 'true';
+        node.innerText = el.content || '';
+        node.style.color = el.style?.color || '#1e293b';
+        node.style.fontSize = (el.style?.fontSize || 18) + 'px';
+        node.style.fontWeight = el.style?.bold ? '700' : '400';
+        node.style.textAlign = el.style?.align || 'right';
+        if (!forPresentation) {
+          node.addEventListener('input', () => {
+            el.content = node.innerText;
+            debounceSave();
+            renderSlidesList();
+          });
+          node.addEventListener('focus', () => {
+            selectedElementId = el.id;
+            renderInspector();
+          });
+        }
+      } else if (el.type === 'rect' || el.type === 'circle') {
+        node.classList.add('shape-el');
+        node.style.background = el.style?.fill || '#0f4c81';
+        if (el.type === 'circle') node.style.borderRadius = '50%';
+      } else if (el.type === 'image') {
+        node.classList.add('img-el');
+        const img = document.createElement('img');
+        img.src = el.content;
+        img.alt = '';
+        node.appendChild(img);
+      }
+
+      if (!forPresentation) {
+        node.addEventListener('mousedown', (e) => startDrag(e, el, node));
+        node.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedElementId = el.id;
+          document.querySelectorAll('.slide-el').forEach(n => n.classList.remove('selected'));
+          node.classList.add('selected');
+          renderInspector();
+        });
+      }
+      return node;
+    }
+
+    /* ---------- DRAG & RESIZE ---------- */
+    function startDrag(e, el, node) {
+      if (e.target.classList.contains('text-el') && node.contentEditable === 'true' && document.activeElement === node) {
+        return; // Let text editing happen
+      }
+      e.preventDefault();
+      selectedElementId = el.id;
+      document.querySelectorAll('.slide-el').forEach(n => n.classList.remove('selected'));
+      node.classList.add('selected');
+      renderInspector();
+
+      const canvas = document.getElementById('slide-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startLeft = el.x;
+      const startTop = el.y;
+
+      // Detect resize corner (bottom-left ::after dot)
+      const isResize = e.target === node && e.offsetX < 15 && e.offsetY > node.offsetHeight - 15;
+
+      function onMove(ev) {
+        const dx = ((ev.clientX - startX) / rect.width) * 100;
+        const dy = ((ev.clientY - startY) / rect.height) * 100;
+
+        if (isResize) {
+          el.w = clamp(el.w - dx, 3, 100 - el.x);
+          el.h = clamp(el.h - dy, 3, 100 - el.y);
+          node.style.width = el.w + '%';
+          node.style.height = el.h + '%';
+        } else {
+          el.x = clamp(startLeft + dx, 0, 100 - el.w);
+          el.y = clamp(startTop + dy, 0, 100 - el.h);
+          node.style.left = el.x + '%';
+          node.style.top = el.y + '%';
+        }
+        debounceSave();
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        renderSlidesList();
+        renderInspector();
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    }
+
+    /* ---------- INSERT ELEMENTS ---------- */
+    function insertElement(type) {
+      const slide = deck.slides[currentSlideIndex];
+      if (!slide) return;
+
+      let el;
+      if (type === 'text') {
+        el = {
+          id: uid(), type: 'text',
+          x: 15, y: 40, w: 70, h: 15,
+          content: 'نص جديد',
+          style: { color: '#1e293b', fontSize: 24, bold: false, align: 'right' }
+        };
+      } else if (type === 'rect') {
+        el = { id: uid(), type: 'rect', x: 20, y: 30, w: 30, h: 25, style: { fill: '#0f4c81' } };
+      } else if (type === 'circle') {
+        el = { id: uid(), type: 'circle', x: 30, y: 30, w: 25, h: 25, style: { fill: '#d4af37' } };
+      } else return;
+
+      slide.elements.push(el);
+      selectedElementId = el.id;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    /* ---------- IMAGE UPLOAD ---------- */
+    function triggerImageUpload() { document.getElementById('image-input').click(); }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const slide = deck.slides[currentSlideIndex];
+        const el = {
+          id: uid(), type: 'image',
+          x: 25, y: 25, w: 50, h: 40,
+          content: e.target.result
+        };
+        slide.elements.push(el);
+        selectedElementId = el.id;
+        renderCanvas();
+        renderSlidesList();
+        debounceSave();
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    /* ---------- INSPECTOR ---------- */
+    function renderInspector() {
+      const props = document.getElementById('element-props');
+      const slide = deck.slides[currentSlideIndex];
+      if (!slide) return;
+
+      const el = slide.elements.find(e => e.id === selectedElementId);
+      if (!el) {
+        props.innerHTML = '<div class="empty-hint">اختر عنصراً من الشريحة لتعديل خصائصه.</div>';
+        return;
+      }
+
+      let html = '';
+
+      if (el.type === 'text') {
+        html += `
+          <div class="inspector-row">
+            <label>اللون</label>
+            <input type="color" value="${el.style?.color || '#1e293b'}" onchange="updateElStyle('color', this.value)">
+          </div>
+          <div class="inspector-row">
+            <label>الحجم</label>
+            <input type="number" value="${el.style?.fontSize || 18}" min="8" max="120" onchange="updateElStyle('fontSize', parseInt(this.value))">
+          </div>
+          <div class="inspector-row">
+            <label>عريض</label>
+            <button class="tool-btn" style="background:${el.style?.bold ? '#e0f2fe' : 'transparent'};" onclick="updateElStyle('bold', ${!el.style?.bold})">
+              <i class="ph ph-text-b"></i>
+            </button>
+          </div>
+          <div class="inspector-row">
+            <label>المحاذاة</label>
+            <select onchange="updateElStyle('align', this.value)" style="flex:1;padding:4px;border:1px solid var(--border);border-radius:4px;font-family:Cairo;">
+              <option value="right" ${el.style?.align === 'right' ? 'selected' : ''}>يمين</option>
+              <option value="center" ${el.style?.align === 'center' ? 'selected' : ''}>وسط</option>
+              <option value="left" ${el.style?.align === 'left' ? 'selected' : ''}>يسار</option>
+            </select>
+          </div>
+        `;
+      } else if (el.type === 'rect' || el.type === 'circle') {
+        html += `
+          <div class="inspector-row">
+            <label>اللون</label>
+            <input type="color" value="${el.style?.fill || '#0f4c81'}" onchange="updateElStyle('fill', this.value)">
+          </div>
+        `;
+      } else if (el.type === 'image') {
+        html += `<div class="empty-hint">صورة مضافة — استخدم المقبض في الأسفل لتغيير الحجم.</div>`;
+      }
+
+      // Position/size numeric
+      html += `
+        <div class="inspector-row">
+          <label>س / ص</label>
+          <input type="number" value="${Math.round(el.x)}" min="0" max="100" onchange="updateElPos('x', parseInt(this.value))">
+          <input type="number" value="${Math.round(el.y)}" min="0" max="100" onchange="updateElPos('y', parseInt(this.value))">
+        </div>
+        <div class="inspector-row">
+          <label>ع / ط</label>
+          <input type="number" value="${Math.round(el.w)}" min="3" max="100" onchange="updateElPos('w', parseInt(this.value))">
+          <input type="number" value="${Math.round(el.h)}" min="3" max="100" onchange="updateElPos('h', parseInt(this.value))">
+        </div>
+        <button class="btn btn-danger" style="width:100%;margin-top:8px;justify-content:center;" onclick="deleteSelectedElement()">
+          <i class="ph ph-trash"></i> حذف العنصر
+        </button>
+      `;
+
+      props.innerHTML = html;
+    }
+
+    function updateElStyle(key, value) {
+      const slide = deck.slides[currentSlideIndex];
+      const el = slide.elements.find(e => e.id === selectedElementId);
+      if (!el) return;
+      if (!el.style) el.style = {};
+      el.style[key] = value;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function updateElPos(key, value) {
+      const slide = deck.slides[currentSlideIndex];
+      const el = slide.elements.find(e => e.id === selectedElementId);
+      if (!el) return;
+      el[key] = clamp(value, 0, 100);
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function deleteSelectedElement() {
+      const slide = deck.slides[currentSlideIndex];
+      slide.elements = slide.elements.filter(e => e.id !== selectedElementId);
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    /* ---------- SLIDE MANAGEMENT ---------- */
+    function selectSlide(idx) {
+      currentSlideIndex = idx;
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+    }
+
+    function addSlide() {
+      deck.slides.push(newSlideData());
+      currentSlideIndex = deck.slides.length - 1;
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function deleteSlide() {
+      if (deck.slides.length <= 1) { alert('لا يمكن حذف الشريحة الأخيرة.'); return; }
+      if (!confirm('حذف هذه الشريحة؟')) return;
+      deck.slides.splice(currentSlideIndex, 1);
+      currentSlideIndex = Math.min(currentSlideIndex, deck.slides.length - 1);
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function duplicateSlide() {
+      const copy = JSON.parse(JSON.stringify(deck.slides[currentSlideIndex]));
+      copy.id = uid();
+      copy.elements.forEach(e => e.id = uid());
+      deck.slides.splice(currentSlideIndex + 1, 0, copy);
+      currentSlideIndex++;
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function moveSlide(dir) {
+      const newIdx = currentSlideIndex + dir;
+      if (newIdx < 0 || newIdx >= deck.slides.length) return;
+      const [slide] = deck.slides.splice(currentSlideIndex, 1);
+      deck.slides.splice(newIdx, 0, slide);
+      currentSlideIndex = newIdx;
+      renderSlidesList();
+      debounceSave();
+    }
+
+    function setSlideBg(color) {
+      deck.slides[currentSlideIndex].bg = color;
+      renderCanvas();
+      renderSlidesList();
+      debounceSave();
+    }
+
+    /* ---------- SAVE / LOAD ---------- */
+    function saveNow(silent = false) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(deck));
+        const ind = document.getElementById('save-indicator');
+        ind.innerHTML = '<i class="ph ph-check-circle"></i> محفوظ';
+        ind.classList.add('saved');
+        setTimeout(() => { ind.innerHTML = ''; ind.classList.remove('saved'); }, 2000);
+        if (!silent) return true;
+      } catch (e) {
+        console.error('Save failed:', e);
+        if (!silent) alert('فشل الحفظ — قد تكون المساحة ممتلئة.');
+        return false;
+      }
+    }
+
+    function newDeck() {
+      if (!confirm('إنشاء عرض جديد؟ سيتم مسح العرض الحالي (احفظه أولاً إن أردت).')) return;
+      deck = { slides: [newSlideData()] };
+      currentSlideIndex = 0;
+      selectedElementId = null;
+      renderCanvas();
+      renderSlidesList();
+      saveNow();
+    }
+
+    /* ---------- EXPORT / IMPORT JSON ---------- */
+    function exportJSON() {
+      const data = JSON.stringify(deck, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Emaar_Show_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function triggerImport() { document.getElementById('json-input').click(); }
+
+    function handleJSONImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed.slides || !Array.isArray(parsed.slides)) throw new Error('Invalid deck');
+          if (!confirm('سيتم استبدال العرض الحالي. متابعة؟')) return;
+          deck = parsed;
+          currentSlideIndex = 0;
+          selectedElementId = null;
+          renderCanvas();
+          renderSlidesList();
+          saveNow();
+        } catch (err) {
+          alert('ملف غير صالح. تأكد من أنه ملف Emaar Show JSON.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    /* ---------- PRESENT MODE ---------- */
+    let presentIndex = 0;
+
+    function startPresenting() {
+      presentIndex = currentSlideIndex;
+      document.getElementById('present-overlay').classList.add('active');
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+      renderPresentSlide();
+    }
+
+    function stopPresenting() {
+      document.getElementById('present-overlay').classList.remove('active');
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function renderPresentSlide() {
+      const slide = deck.slides[presentIndex];
+      if (!slide) return;
+      const target = document.getElementById('present-slide');
+      target.style.background = slide.bg;
+      target.innerHTML = '';
+      slide.elements.forEach(el => target.appendChild(buildElementNode(el, true)));
+
+      document.getElementById('present-counter').textContent =
+        `${presentIndex + 1} / ${deck.slides.length}`;
+      document.getElementById('present-prev').disabled = presentIndex === 0;
+      document.getElementById('present-next').disabled = presentIndex === deck.slides.length - 1;
+    }
+
+    function presentNav(dir) {
+      const next = presentIndex + dir;
+      if (next < 0 || next >= deck.slides.length) return;
+      presentIndex = next;
+      renderPresentSlide();
+    }
+
+    /* ---------- KEYBOARD ---------- */
+    document.addEventListener('keydown', (e) => {
+      // Delete selected element (when not typing)
+      if ((e.key === 'Delete' || e.key === 'Backspace') &&
+          selectedElementId &&
+          document.activeElement.contentEditable !== 'true') {
+        e.preventDefault();
+        deleteSelectedElement();
+        return;
+      }
+
+      // Ctrl+S save
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveNow();
+        return;
+      }
+
+      // Present mode navigation
+      const overlay = document.getElementById('present-overlay');
+      if (overlay.classList.contains('active')) {
+        if (e.key === 'ArrowLeft' || e.key === 'PageDown') { e.preventDefault(); presentNav(1); }
+        if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); presentNav(-1); }
+        if (e.key === 'Escape') stopPresenting();
+      } else {
+        // Navigate slides when not editing
+        if (document.activeElement.contentEditable !== 'true') {
+          if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+            e.preventDefault();
+            if (currentSlideIndex < deck.slides.length - 1) selectSlide(currentSlideIndex + 1);
+          }
+          if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+            e.preventDefault();
+            if (currentSlideIndex > 0) selectSlide(currentSlideIndex - 1);
+          }
+        }
+      }
+    });
+
+    // Click canvas empty area → deselect
+    document.getElementById('slide-canvas').addEventListener('click', (e) => {
+      if (e.target.id === 'slide-canvas') {
+        selectedElementId = null;
+        document.querySelectorAll('.slide-el').forEach(n => n.classList.remove('selected'));
+        renderInspector();
+      }
+    });
+
+    /* ---------- INIT ---------- */
+    loadDeck();
+    renderCanvas();
+    renderSlidesList();
+  </script>
+</body>
+</html>

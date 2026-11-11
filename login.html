@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - أدوات إعمار</title>
+  <link rel="icon" href="data:,">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+
+  <style>
+    :root { --primary: #0f4c81; --accent: #d4af37; --border: #e2e8f0; --text-main: #1e293b; --text-muted: #64748b; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body {
+      background: #1e293b;
+      display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+      border-radius: 24px; width: 100%; max-width: 450px; padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center;
+    }
+    .login-card h1 { color: var(--primary); font-size: 28px; margin-bottom: 10px; }
+    .login-card p { color: var(--text-muted); font-size: 15px; margin-bottom: 20px; line-height: 1.6; }
+    
+    .input-group { margin-bottom: 15px; text-align: right; }
+    .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; color: var(--text-main); }
+    .input-group input {
+      width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 10px;
+      font-family: 'Cairo', sans-serif; font-size: 14px; outline: none; transition: 0.2s;
+      background: #f8fafc; direction: ltr;
+    }
+    .input-group input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px #e0f2fe; }
+    
+    .btn-primary {
+      background: var(--primary); color: white; border: none;
+      padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600;
+      font-family: 'Cairo', sans-serif; cursor: pointer; width: 100%; transition: all 0.3s; margin-top: 10px;
+    }
+    .btn-primary:hover { background: #0d3f6b; }
+    
+    .btn-toggle { background: transparent; border: none; color: var(--primary); font-family: 'Cairo'; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 15px; text-decoration: underline; }
+    
+    #error-message { color: #ef4444; font-size: 13px; font-weight: 600; margin-top: 15px; display: none; line-height: 1.4; }
+    #success-message { color: #16a34a; font-size: 13px; font-weight: 600; margin-top: 15px; display: none; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h1>بوابة أدوات إعمار</h1>
+    <p id="subtitle">سجل دخولك للوصول إلى الأدوات.</p>
+
+    <form id="auth-form">
+      <div class="input-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="email" placeholder="name@example.com" required>
+      </div>
+      <div class="input-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      
+      <button type="submit" id="submit-btn" class="btn-primary">تسجيل الدخول</button>
+    </form>
+    
+    <button class="btn-toggle" id="toggle-mode">ليس لديك حساب؟ إنشاء حساب جديد</button>
+
+    <div id="error-message"></div>
+    <div id="success-message"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCx5lzS0B1QqqfuzOol5cYlzbecYhB9HoA",
+      authDomain: "emaar-tools.firebaseapp.com",
+      projectId: "emaar-tools",
+      storageBucket: "emaar-tools.firebasestorage.app",
+      messagingSenderId: "632274691084",
+      appId: "1:632274691084:web:dbbdfd1fb570ade3b0fa29",
+      measurementId: "G-FM7HLQEJ2H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById('auth-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleBtn = document.getElementById('toggle-mode');
+    const subtitle = document.getElementById('subtitle');
+    const errorMsg = document.getElementById('error-message');
+    const successMsg = document.getElementById('success-message');
+
+    let isLoginMode = true;
+
+    // Switch between Login and Sign Up
+    toggleBtn.addEventListener('click', () => {
+      isLoginMode = !isLoginMode;
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+      
+      if (isLoginMode) {
+        subtitle.innerText = 'سجل دخولك للوصول إلى الأدوات.';
+        submitBtn.innerText = 'تسجيل الدخول';
+        toggleBtn.innerText = 'ليس لديك حساب؟ إنشاء حساب جديد';
+      } else {
+        subtitle.innerText = 'أنشئ حساباً جديداً للبدء.';
+        submitBtn.innerText = 'إنشاء حساب';
+        toggleBtn.innerText = 'لديك حساب بالفعل؟ تسجيل الدخول';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'جاري التحميل...';
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      try {
+        if (isLoginMode) {
+          await signInWithEmailAndPassword(auth, email, password);
+          // Redirect happens in onAuthStateChanged
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+          // Redirect happens in onAuthStateChanged
+        }
+      } catch (error) {
+        console.error(error);
+        submitBtn.disabled = false;
+        submitBtn.innerText = isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب';
+        
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+          errorMsg.innerText = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+        } else if (error.code === 'auth/email-already-in-use') {
+          errorMsg.innerText = 'هذا البريد مسجل بالفعل، يرجى تسجيل الدخول.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg.innerText = 'كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل.';
+        } else {
+          errorMsg.innerText = 'حدث خطأ: ' + error.message;
+        }
+        errorMsg.style.display = 'block';
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) { window.location.href = "index.html"; }
+    });
+  </script>
+</body>
+</html>
