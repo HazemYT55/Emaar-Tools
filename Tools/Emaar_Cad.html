@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><title>Emaar Cad - الرسم الهندسي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: #e2e8f0; height: 100vh; display: flex; flex-direction: column; }
+    .toolbar { background: white; padding: 10px 20px; display: flex; gap: 15px; align-items: center; border-bottom: 1px solid #cbd5e1; }
+    .btn { background: #0f4c81; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-family: 'Cairo'; font-weight: 600; }
+    .btn.active { background: #ef4444; }
+    .color-picker { width: 40px; height: 40px; padding: 0; border: none; border-radius: 50%; cursor: pointer; }
+    .canvas-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    canvas { background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 8px; cursor: crosshair; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="btn active" id="draw-btn" onclick="setTool('draw')">قلم</button>
+    <button class="btn" id="erase-btn" onclick="setTool('erase')">ممحاة</button>
+    <input type="color" class="color-picker" id="color" value="#0f4c81">
+    <button class="btn" style="background:#ef4444; margin-right:auto;" onclick="clearCanvas()">مسح الكل</button>
+  </div>
+  <div class="canvas-container">
+    <canvas id="canvas" width="800" height="500"></canvas>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let tool = 'draw';
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.strokeStyle = tool === 'erase' ? '#ffffff' : document.getElementById('color').value;
+      ctx.lineWidth = tool === 'erase' ? 20 : 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    });
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    function setTool(t) {
+      tool = t;
+      document.getElementById('draw-btn').classList.toggle('active', t === 'draw');
+      document.getElementById('erase-btn').classList.toggle('active', t === 'erase');
+    }
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  </script>
+</body>
+</html>
