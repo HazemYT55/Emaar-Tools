@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><title>Emaar Pic - تحرير الصور</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: #1e293b; height: 100vh; display: flex; flex-direction: column; color: white; }
+    .top-bar { padding: 15px; background: #0f172a; display: flex; justify-content: space-between; align-items: center; }
+    .btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Cairo'; }
+    .workspace { flex: 1; display: flex; overflow: hidden; }
+    .sidebar { width: 300px; background: #0f172a; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+    .control-group label { display: block; margin-bottom: 5px; font-size: 14px; }
+    input[type="range"] { width: 100%; }
+    .canvas-area { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden; }
+    canvas { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #fff; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <span style="font-size:20px; font-weight:bold;">🖼️ إعمار بيك (Emaar Pic)</span>
+    <div>
+      <input type="file" id="upload" accept="image/*" style="display:none;" onchange="loadImage(event)">
+      <button class="btn" onclick="document.getElementById('upload').click()">رفع صورة</button>
+      <button class="btn" style="background:#22c55e;" onclick="downloadImage()">تحميل</button>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="sidebar">
+      <div class="control-group"><label>السطوع (Brightness): <span id="b-val">100</span>%</label><input type="range" id="brightness" min="0" max="200" value="100" oninput="applyFilters()"></div>
+      <div class="control-group"><label>التباين (Contrast): <span id="c-val">100</span>%</label><input type="range" id="contrast" min="0" max="200" value="100" oninput="applyFilters()"></div>
+      <div class="control-group"><label>الضبابية (Blur): <span id="bl-val">0</span>px</label><input type="range" id="blur" min="0" max="20" value="0" oninput="applyFilters()"></div>
+      <div class="control-group"><label>الرمادي (Grayscale): <span id="g-val">0</span>%</label><input type="range" id="grayscale" min="0" max="100" value="0" oninput="applyFilters()"></div>
+      <div class="control-group"><label>عكس الألوان (Invert): <span id="i-val">0</span>%</label><input type="range" id="invert" min="0" max="100" value="0" oninput="applyFilters()"></div>
+    </div>
+    <div class="canvas-area">
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let img = new Image();
+
+    function loadImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          applyFilters();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyFilters() {
+      if (!img.src) return;
+      const b = document.getElementById('brightness').value;
+      const c = document.getElementById('contrast').value;
+      const bl = document.getElementById('blur').value;
+      const g = document.getElementById('grayscale').value;
+      const i = document.getElementById('invert').value;
+
+      document.getElementById('b-val').innerText = b;
+      document.getElementById('c-val').innerText = c;
+      document.getElementById('bl-val').innerText = bl;
+      document.getElementById('g-val').innerText = g;
+      document.getElementById('i-val').innerText = i;
+
+      ctx.filter = `brightness(${b}%) contrast(${c}%) blur(${bl}px) grayscale(${g}%) invert(${i}%)`;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    }
+
+    function downloadImage() {
+      if (!img.src) return alert('ارفع صورة أولاً');
+      const link = document.createElement('a');
+      link.download = 'emaar_edit.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
