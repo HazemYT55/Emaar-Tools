@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X - Emaar Posts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #16181c;
+      --border: #2f3336;
+      --text-main: #e7e9ea;
+      --text-muted: #71767b;
+      --blue: #1d9bf0;
+      --blue-hover: #1a8cd8;
+      --green: #00ba7c;
+      --pink: #f91880;
+    }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
+
+    /* Layout */
+    .app-container { display: flex; width: 100%; max-width: 1200px; }
+    
+    /* Sidebar */
+    .sidebar { width: 275px; padding: 10px 20px; border-left: 1px solid var(--border); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+    .x-logo { font-size: 32px; font-weight: 900; padding: 15px; width: fit-content; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+    .x-logo:hover { background: rgba(255,255,255,0.1); }
+    
+    .nav-item { display: flex; align-items: center; gap: 20px; padding: 15px; font-size: 20px; font-weight: 700; border-radius: 30px; cursor: pointer; width: fit-content; margin-bottom: 5px; transition: 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item i { font-size: 28px; }
+    .nav-item.active { font-weight: 900; }
+    
+    .post-btn { background: var(--text-main); color: black; border: none; padding: 15px; border-radius: 30px; font-size: 17px; font-weight: 700; width: 90%; margin-top: 20px; cursor: pointer; font-family: 'Cairo'; transition: 0.2s; }
+    .post-btn:hover { background: #d7dbdc; }
+
+    .profile-btn { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 30px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
+    .profile-btn:hover { background: rgba(255,255,255,0.1); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Feed */
+    .feed-container { flex: 1; border-left: 1px solid var(--border); border-right: 1px solid var(--border); min-height: 100vh; max-width: 600px; }
+    
+    .feed-header { position: sticky; top: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10; display: flex; align-items: center; gap: 20px; padding: 10px 15px; }
+    .back-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; display: none; }
+    .feed-header h2 { font-size: 20px; font-weight: 700; }
+    .feed-header p { font-size: 13px; color: var(--text-muted); }
+    
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: 0.2s; }
+    .tab:hover { background: rgba(255,255,255,0.05); }
+    .tab.active { color: var(--text-main); }
+    .tab-indicator { height: 4px; background: var(--blue); border-radius: 2px; width: 56px; margin: 0 auto; margin-top: 10px; display: none; }
+    .tab.active .tab-indicator { display: block; }
+
+    /* Compose */
+    .compose-box { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); }
+    .compose-area { flex: 1; }
+    .compose-area textarea { width: 100%; background: transparent; border: none; color: white; font-size: 20px; resize: none; outline: none; font-family: 'Cairo'; padding-top: 10px; min-height: 50px; }
+    
+    .compose-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 10px; }
+    .compose-icons i { color: var(--blue); font-size: 20px; margin-left: 15px; cursor: pointer; transition: 0.2s; }
+    .compose-icons i:hover { background: rgba(29, 155, 240, 0.1); border-radius: 50%; }
+    
+    .submit-area { display: flex; align-items: center; gap: 15px; }
+    .char-count { font-size: 13px; color: var(--text-muted); display: none; }
+    .char-count.warning { color: #ffd400; }
+    .char-count.danger { color: #f4212e; }
+    
+    .reply-btn { background: var(--blue); color: white; border: none; padding: 8px 20px; border-radius: 30px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Cairo'; transition: 0.2s; opacity: 0.5; pointer-events: none; }
+    .reply-btn.active { opacity: 1; pointer-events: auto; }
+    .reply-btn:hover { background: var(--blue-hover); }
+
+    /* Post */
+    .post { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+    .post:hover { background: rgba(255,255,255,0.03); }
+    
+    .post-content { flex: 1; }
+    .post-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+    .post-name { font-weight: 700; font-size: 15px; }
+    .verified { color: var(--blue); font-size: 16px; }
+    .post-user { color: var(--text-muted); font-size: 15px; }
+    .post-time { color: var(--text-muted); font-size: 15px; }
+    .post-text { font-size: 15px; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
+    
+    /* Post Image */
+    .post-image { width: 100%; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 10px; object-fit: cover; max-height: 400px; }
+
+    .post-actions { display: flex; justify-content: space-between; max-width: 425px; margin-top: 10px; }
+    .action { display: flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: 0.2s; }
+    .action i { font-size: 18px; padding: 8px; border-radius: 50%; transition: 0.2s; }
+    
+    .action.reply:hover { color: var(--blue); }
+    .action.reply:hover i { background: rgba(29, 155, 240, 0.1); }
+    .action.repost:hover { color: var(--green); }
+    .action.repost:hover i { background: rgba(0, 186, 124, 0.1); }
+    .action.repost.active { color: var(--green); }
+    .action.like:hover { color: var(--pink); }
+    .action.like:hover i { background: rgba(249, 24, 128, 0.1); }
+    .action.like.active { color: var(--pink); }
+    .action.like.active i { font-weight: bold; }
+
+    /* Right Sidebar */
+    .right-sidebar { width: 350px; padding: 10px 20px; position: sticky; top: 0; height: 100vh; }
+    .search-bar { background: var(--surface); border-radius: 30px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .search-bar input { background: transparent; border: none; color: white; outline: none; font-family: 'Cairo'; width: 100%; }
+    .trends-box { background: var(--surface); border-radius: 16px; padding: 15px; margin-bottom: 20px; }
+    .trends-box h3 { font-size: 20px; margin-bottom: 15px; }
+    .trend-item { padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .trend-item:hover { background: rgba(255,255,255,0.05); }
+    .trend-category { font-size: 13px; color: var(--text-muted); }
+    .trend-name { font-weight: 700; font-size: 15px; margin: 2px 0; }
+    .trend-posts { font-size: 13px; color: var(--text-muted); }
+
+    @media (max-width: 1000px) {
+      .sidebar { width: 80px; padding: 10px; align-items: center; }
+      .sidebar .nav-text, .sidebar .post-btn, .profile-btn .user-details { display: none; }
+      .nav-item i { font-size: 26px; }
+      .right-sidebar { display: none; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .feed-container { border: none; }
+      .back-btn { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+      <div class="x-logo">𝕏</div>
+      <div class="nav-item active"><i class="ph-fill ph-house"></i> <span class="nav-text">الرئيسية</span></div>
+      <div class="nav-item"><i class="ph ph-magnifying-glass"></i> <span class="nav-text">استكشاف</span></div>
+      <div class="nav-item"><i class="ph ph-bell"></i> <span class="nav-text">الإشعارات</span></div>
+      <div class="nav-item"><i class="ph ph-envelope-simple"></i> <span class="nav-text">الرسائل</span></div>
+      <div class="nav-item"><i class="ph ph-user"></i> <span class="nav-text">الملف الشخصي</span></div>
+      
+      <button class="post-btn" onclick="focusCompose()">منشور</button>
+      
+      <div class="profile-btn">
+        <div class="avatar" id="my-avatar">H</div>
+        <div class="user-details">
+          <div style="font-weight: 700;" id="my-name">Hazem</div>
+          <div style="color: var(--text-muted); font-size: 14px;" id="my-handle">@HazemYT55</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER FEED -->
+    <div class="feed-container">
+      <div class="feed-header">
+        <button class="back-btn"><i class="ph ph-arrow-right"></i></button>
+        <div>
+          <h2>الرئيسية</h2>
+          <p>15.4 ألف منشور</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active">لك <div class="tab-indicator"></div></div>
+        <div class="tab">متابعة <div class="tab-indicator"></div></div>
+      </div>
+
+      <!-- Compose Area -->
+      <div class="compose-box">
+        <div class="avatar">H</div>
+        <div class="compose-area">
+          <textarea id="post-input" placeholder="ماذا يحدث؟!" oninput="handleInput()"></textarea>
+          <div class="compose-bottom">
+            <div class="compose-icons">
+              <i class="ph ph-image" onclick="document.getElementById('image-upload').click()"></i>
+              <i class="ph ph-gif"></i>
+              <i class="ph ph-list-dashes"></i>
+              <i class="ph ph-smiley"></i>
+              <i class="ph ph-calendar-blank"></i>
+              <i class="ph ph-map-pin"></i>
+            </div>
+            
+            <div class="submit-area">
+              <span class="char-count" id="char-count">280</span>
+              <button class="reply-btn" id="post-btn" onclick="createPost()">نشر</button>
+            </div>
+          </div>
+          <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div id="feed"></div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-sidebar">
+      <div class="search-bar">
+        <i class="ph ph-magnifying-glass" style="color:var(--text-muted); font-size:20px;"></i>
+        <input type="text" placeholder="بحث">
+      </div>
+      
+      <div class="trends-box">
+        <h3>الأحداث الرائجة</h3>
+        <div class="trend-item">
+          <div class="trend-category">التقنية · الترند</div>
+          <div class="trend-name">#EmaarTools</div>
+          <div class="trend-posts">15.4 ألف منشور</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-category">البرمجة · الترند</div>
+          <div class="trend-name">#Firebase</div>
+          <div class="trend-posts">8,201 منشور</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-category">الترند في السعودية</div>
+          <div class="trend-name">#Hazem</div>
+          <div class="trend-posts">4,109 منشور</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Real Data Setup
+    let posts = JSON.parse(localStorage.getItem('xPosts')) || [
+      {
+        id: 1,
+        name: "إعمار الخليج",
+        handle: "@EmaarGulf",
+        verified: true,
+        time: "2س",
+        text: "يسرنا الإعلان عن إطلاق منصة Emaar Tools الداخلية الجديدة! 15 أداة متكاملة في مكان واحد. 🚀\n\n#EmaarTools #Tech",
+        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
+        likes: 342,
+        reposts: 89,
+        replies: 24,
+        isLiked: false,
+        isReposted: false
+      },
+      {
+        id: 2,
+        name: "Hazem",
+        handle: "@HazemYT55",
+        verified: true,
+        time: "4س",
+        text: "قمت ببرمجة الـ AI المحلي اليوم. يعمل بدون إنترنت تماماً وبدون API Key! 🤯\nهل أنتم مستعدون لتجربته؟",
+        image: null,
+        likes: 1200,
+        reposts: 305,
+        replies: 84,
+        isLiked: true,
+        isReposted: false
+      }
+    ];
+
+    const feed = document.getElementById('feed');
+    const textarea = document.getElementById('post-input');
+    const postBtn = document.getElementById('post-btn');
+    const charCount = document.getElementById('char-count');
+    
+    let currentImageBase64 = null;
+
+    // Textarea logic
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    function handleInput() {
+      const len = textarea.value.length;
+      const remaining = 280 - len;
+      
+      charCount.style.display = len > 0 ? 'block' : 'none';
+      charCount.innerText = remaining;
+
+      if (remaining < 20 && remaining >= 0) {
+        charCount.className = 'char-count warning';
+      } else if (remaining < 0) {
+        charCount.className = 'char-count danger';
+      } else {
+        charCount.className = 'char-count';
+      }
+
+      if (len > 0 && len <= 280) {
+        postBtn.classList.add('active');
+      } else {
+        postBtn.classList.remove('active');
+      }
+    }
+
+    function focusCompose() {
+      textarea.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + ' مليون';
+      if (num >= 1000) return (num / 1000).toFixed(1) + ' ألف';
+      return num;
+    }
+
+    // Image Upload
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentImageBase64 = e.target.result;
+        // Add a small visual indicator that image is attached
+        textarea.placeholder = "تم إرفاق صورة! اكتب تعليقك...";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderPosts() {
+      feed.innerHTML = '';
+      posts.forEach(p => {
+        const postHTML = `
+          <div class="post">
+            <div class="avatar">${p.name.charAt(0).toUpperCase()}</div>
+            <div class="post-content">
+              <div class="post-header">
+                <span class="post-name">${p.name}</span>
+                ${p.verified ? '<i class="ph-fill ph-seal-check verified"></i>' : ''}
+                <span class="post-user">${p.handle}</span>
+                <span class="post-time">· ${p.time}</span>
+              </div>
+              <div class="post-text">${p.text}</div>
+              ${p.image ? `<img src="${p.image}" class="post-image" alt="صورة">` : ''}
+              
+              <div class="post-actions">
+                <div class="action reply">
+                  <i class="ph ph-chat-circle"></i> <span>${formatNumber(p.replies)}</span>
+                </div>
+                <div class="action repost ${p.isReposted ? 'active' : ''}" onclick="toggleAction(${p.id}, 'repost')">
+                  <i class="ph ph-repeat"></i> <span>${formatNumber(p.reposts)}</span>
+                </div>
+                <div class="action like ${p.isLiked ? 'active' : ''}" onclick="toggleAction(${p.id}, 'like')">
+                  <i class="${p.isLiked ? 'ph-fill' : 'ph'} ph-heart"></i> <span>${formatNumber(p.likes)}</span>
+                </div>
+                <div class="action">
+                  <i class="ph ph-chart-bar"></i> <span>${formatNumber(Math.floor(p.likes / 10))}</span>
+                </div>
+                <div class="action">
+                  <i class="ph ph-upload-simple"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        feed.innerHTML += postHTML;
+      });
+    }
+
+    function createPost() {
+      const text = textarea.value.trim();
+      if (!text || text.length > 280) return;
+      
+      const newPost = {
+        id: Date.now(),
+        name: "Hazem",
+        handle: "@HazemYT55",
+        verified: true,
+        time: "الآن",
+        text: text,
+        image: currentImageBase64,
+        likes: 0,
+        reposts: 0,
+        replies: 0,
+        isLiked: false,
+        isReposted: false
+      };
+      
+      posts.unshift(newPost);
+      localStorage.setItem('xPosts', JSON.stringify(posts));
+      
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      textarea.placeholder = "ماذا يحدث؟!";
+      currentImageBase64 = null;
+      handleInput();
+      renderPosts();
+    }
+
+    function toggleAction(id, type) {
+      const post = posts.find(p => p.id === id);
+      if (!post) return;
+
+      if (type === 'like') {
+        post.isLiked = !post.isLiked;
+        post.likes += post.isLiked ? 1 : -1;
+      } else if (type === 'repost') {
+        post.isReposted = !post.isReposted;
+        post.reposts += post.isReposted ? 1 : -1;
+      }
+      
+      localStorage.setItem('xPosts', JSON.stringify(posts));
+      renderPosts();
+    }
+
+    renderPosts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مركز التحميل - أدوات إعمار</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  
+  <style>
+    :root { 
+      --primary: #0f4c81; 
+      --accent: #d4af37; 
+      --bg: #f4f7f9; 
+      --text-main: #1e293b; 
+      --text-muted: #64748b; 
+      --border: #e2e8f0; 
+    }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { 
+      background: var(--bg); 
+      min-height: 100vh; 
+      padding: 40px 20px; 
+      color: var(--text-main); 
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header { text-align: center; margin-bottom: 50px; }
+    .header img { height: 60px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .header h1 { font-size: 32px; color: var(--primary); margin-bottom: 10px; }
+    .header p { color: var(--text-muted); font-size: 16px; }
+    
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 25px; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      flex: 1;
+      align-content: center;
+    }
+    
+    .card { 
+      background: white; 
+      padding: 35px 30px; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+      text-align: center; 
+      border: 1px solid var(--border); 
+      transition: 0.3s; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+    .card:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 15px 30px rgba(15,76,129,0.1); 
+      border-color: var(--primary); 
+    }
+    
+    .card-icon { font-size: 55px; color: var(--primary); margin-bottom: 20px; }
+    .card h2 { font-size: 22px; margin-bottom: 10px; color: var(--text-main); }
+    .card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; flex: 1; }
+    
+    .btn { 
+      width: 100%; 
+      padding: 14px; 
+      border-radius: 8px; 
+      font-weight: 700; 
+      text-decoration: none; 
+      transition: 0.3s; 
+      display: inline-flex; 
+      justify-content: center; 
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #0d3f6b; }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: white; }
+    .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border: none; }
+    
+    .back-link { display: block; text-align: center; margin-top: 50px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; }
+    .back-link:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="assets/logo.jpg" alt="Emaar Logo" onerror="this.style.display='none'">
+    <h1>مركز تحميل أدوات إعمار</h1>
+    <p>اختر المنصة التي تريد استخدام الأدوات عليها</p>
+  </div>
+
+  <div class="grid">
+    
+    <!-- Web Version -->
+    <div class="card">
+      <i class="ph ph-globe card-icon"></i>
+      <h2>النسخة السحابية (Web)</h2>
+      <p>استخدم الأدوات مباشرة من متصفحك دون الحاجة لتحميل أي شيء. تعمل على جميع الأجهزة فوراً.</p>
+      <a href="index.html" class="btn btn-primary">
+        <i class="ph ph-browser"></i> افتح من المتصفح
+      </a>
+    </div>
+
+    <!-- Windows Version -->
+    <div class="card" style="border: 2px solid var(--accent); background: linear-gradient(to bottom right, #ffffff, #fefce8);">
+      <i class="ph ph-windows-logo card-icon" style="color: var(--accent);"></i>
+      <h2>تطبيق الويندوز (Desktop)</h2>
+      <p>نسخة سطح المكتب لنظام Windows 10/11. تعمل بدون متصفح وبسرعة معالجة أعلى.</p>
+      <a href="download_win.html" class="btn btn-outline" style="border-color: var(--accent); color: #b4860b;">
+        <i class="ph ph-download-simple"></i> صفحة التحميل
+      </a>
+    </div>
+
+    <!-- Android / Mobile -->
+    <div class="card">
+      <i class="ph ph-android-logo card-icon" style="color: #94a3b8;"></i>
+      <h2>تطبيق الهواتف (Mobile)</h2>
+      <p>قريباً: تطبيق مخصص للأندرويد والآيفون لاستخدام الأدوات أثناء التنقل.</p>
+      <button class="btn btn-disabled" disabled>
+        قريباً...
+      </button>
+    </div>
+
+  </div>
+
+  <a href="index.html" class="back-link">
+    <i class="ph ph-arrow-right"></i> العودة للصفحة الرئيسية
+  </a>
+
+</body>
+</html>

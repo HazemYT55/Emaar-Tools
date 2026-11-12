@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emaar Pic - Working Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root {
+      --bg-ui: #323232; --bg-panel: #3d3d3d; --border: #262626;
+      --text-main: #d1d1d1; --accent: #1473e6; --canvas-bg: #1e1e1e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+    body { background: var(--bg-ui); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text-main); }
+
+    /* Top Menu Bar */
+    .menu-bar { background: #323232; height: 28px; display: flex; align-items: center; padding: 0 10px; gap: 15px; border-bottom: 1px solid #262626; }
+    .menu-item { cursor: pointer; padding: 2px 5px; border-radius: 3px; }
+    .menu-item:hover { background: #4a4a4a; }
+
+    /* Options Bar */
+    .options-bar { background: #3d3d3d; height: 40px; display: flex; align-items: center; padding: 0 10px; gap: 15px; border-bottom: 1px solid #262626; }
+    .opt-input { background: #262626; border: 1px solid #1a1a1a; color: white; padding: 3px 8px; border-radius: 3px; outline: none; }
+    .opt-btn { background: var(--accent); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+    .opt-btn:hover { background: #0d5bb5; }
+
+    /* Workspace */
+    .workspace { display: flex; flex: 1; overflow: hidden; }
+
+    /* Left Toolbar */
+    .toolbar { width: 45px; background: #323232; border-left: 1px solid #262626; display: flex; flex-direction: column; align-items: center; padding: 5px 0; gap: 4px; }
+    .tool-btn { width: 35px; height: 35px; background: transparent; border: none; color: #ccc; border-radius: 4px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+    .tool-btn:hover { background: #4a4a4a; }
+    .tool-btn.active { background: var(--accent); color: white; }
+    .divider { width: 25px; height: 1px; background: #555; margin: 4px 0; }
+
+    /* Canvas Area */
+    .canvas-area { flex: 1; background: var(--canvas-bg); display: flex; flex-direction: column; overflow: hidden; }
+    .doc-tab { background: #3d3d3d; width: fit-content; padding: 6px 15px; display: flex; align-items: center; gap: 10px; border-radius: 4px 4px 0 0; margin-left: 10px; margin-top: 10px; border: 1px solid #262626; border-bottom: none; }
+    
+    .canvas-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+    canvas { background: #ffffff; box-shadow: 0 5px 20px rgba(0,0,0,0.5); cursor: crosshair; }
+    
+    /* Right Panels */
+    .right-panels { width: 280px; background: #323232; border-right: 1px solid #262626; display: flex; flex-direction: column; overflow-y: auto; }
+    .panel-group { display: flex; flex-direction: column; border-bottom: 1px solid #262626; }
+    .panel-header { background: #3d3d3d; padding: 8px 10px; font-weight: 600; }
+    .panel-content { padding: 10px; }
+
+    /* Color Box */
+    .color-box { display: flex; gap: 10px; margin-bottom: 10px; }
+    .color-box input { width: 40px; height: 30px; padding: 0; border: none; cursor: pointer; }
+
+    /* Sliders */
+    .slider-group { margin-bottom: 10px; }
+    .slider-group label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+    /* Tool Options (Hidden by default) */
+    .tool-opt { display: none; align-items: center; gap: 10px; }
+    .tool-opt.active { display: flex; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Menu -->
+  <div class="menu-bar">
+    <div class="menu-item">ملف (File)</div>
+    <div class="menu-item">تعديل (Edit)</div>
+    <div class="menu-item">صورة (Image)</div>
+    <div class="menu-item" style="color:var(--accent); margin-right:auto; cursor:pointer;" onclick="document.getElementById('file-input').click()">
+      <i class="ph ph-folder-open"></i> فتح صورة (Open)
+    </div>
+    <div class="menu-item" style="color:#22c55e; cursor:pointer;" onclick="downloadImage()">
+      <i class="ph ph-download-simple"></i> حفظ (Save)
+    </div>
+    <input type="file" id="file-input" style="display:none;" accept="image/*" onchange="loadImage(event)">
+  </div>
+
+  <!-- Options Bar -->
+  <div class="options-bar">
+    <div id="opt-move" class="tool-opt active">اسحب الصورة للتحريك (Drag to move)</div>
+    <div id="opt-brush" class="tool-opt">
+      <label>الحجم (Size):</label> <input type="range" id="brush-size" min="1" max="100" value="10">
+      <label>الشفافية (Opacity):</label> <input type="range" id="brush-opacity" min="1" max="100" value="100">
+    </div>
+    <div id="opt-eraser" class="tool-opt">
+      <label>الحجم (Size):</label> <input type="range" id="eraser-size" min="5" max="100" value="20">
+    </div>
+    <div id="opt-text" class="tool-opt">
+      <label>حجم الخط (Font Size):</label> <input type="range" id="font-size" min="10" max="100" value="30">
+    </div>
+    <div id="opt-shapes" class="tool-opt">
+      <select id="shape-type" class="opt-input"><option value="rect">مربع (Rectangle)</option><option value="circle">دائرة (Circle)</option></select>
+      <label>السُمك (Width):</label> <input type="range" id="shape-width" min="1" max="30" value="3">
+    </div>
+    <div id="opt-crop" class="tool-opt">
+      <button class="opt-btn" onclick="applyCrop()">تطبيق القص (Apply Crop)</button>
+    </div>
+    <div id="opt-fill" class="tool-opt">اضغط لملء الشاشة باللون (Click to Fill)</div>
+    <div id="opt-eyedropper" class="tool-opt">اضغط لاختيار لون (Click to Pick Color)</div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace">
+    
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="tool-btn active" id="tool-move" onclick="setTool('move')" title="تحريك"><i class="ph ph-arrows-out-cardinal"></i></button>
+      <button class="tool-btn" id="tool-crop" onclick="setTool('crop')" title="قص"><i class="ph ph-crop"></i></button>
+      <button class="tool-btn" id="tool-eyedropper" onclick="setTool('eyedropper')" title="قطارة الألوان"><i class="ph ph-eyedropper"></i></button>
+      <div class="divider"></div>
+      <button class="tool-btn" id="tool-brush" onclick="setTool('brush')" title="فرشاة"><i class="ph ph-paint-brush"></i></button>
+      <button class="tool-btn" id="tool-eraser" onclick="setTool('eraser')" title="ممحاة"><i class="ph ph-eraser"></i></button>
+      <button class="tool-btn" id="tool-fill" onclick="setTool('fill')" title="تعبئة"><i class="ph ph-paint-bucket"></i></button>
+      <div class="divider"></div>
+      <button class="tool-btn" id="tool-text" onclick="setTool('text')" title="نص"><i class="ph ph-text-t"></i></button>
+      <button class="tool-btn" id="tool-shapes" onclick="setTool('shapes')" title="أشكال"><i class="ph ph-square"></i></button>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-area">
+      <div class="doc-tab"><span>مشروع.psd</span></div>
+      <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Right Panels -->
+    <div class="right-panels">
+      
+      <!-- Color -->
+      <div class="panel-group">
+        <div class="panel-header">اللون (Color)</div>
+        <div class="panel-content color-box">
+          <input type="color" id="color-picker" value="#000000">
+          <input type="color" id="bg-color-picker" value="#ffffff" title="Background">
+        </div>
+      </div>
+
+      <!-- Adjustments -->
+      <div class="panel-group">
+        <div class="panel-header">تعديلات (Adjustments)</div>
+        <div class="panel-content">
+          <div class="slider-group"><label>السطوع (Brightness)</label><input type="range" id="f-brightness" min="0" max="200" value="100" oninput="applyFilters()"></div>
+          <div class="slider-group"><label>التباين (Contrast)</label><input type="range" id="f-contrast" min="0" max="200" value="100" oninput="applyFilters()"></div>
+          <div class="slider-group"><label>التشبع (Saturation)</label><input type="range" id="f-saturate" min="0" max="200" value="100" oninput="applyFilters()"></div>
+          <div class="slider-group"><label>الضبابية (Blur)</label><input type="range" id="f-blur" min="0" max="20" value="0" oninput="applyFilters()"></div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('color-picker');
+    
+    let img = new Image();
+    let currentTool = 'move';
+    let isDrawing = false;
+    let startX = 0, startY = 0;
+    let cropBox = null;
+    let imgOffsetX = 0, imgOffsetY = 0;
+    let startOffsetX = 0, startOffsetY = 0;
+
+    // 1. Initialize
+    canvas.width = 800;
+    canvas.height = 600;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Load Image
+    function loadImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          imgOffsetX = 0; imgOffsetY = 0;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 3. Set Tool
+    function setTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`tool-${tool}`);
+      if (btn) btn.classList.add('active');
+      
+      document.querySelectorAll('.tool-opt').forEach(p => p.classList.remove('active'));
+      const opt = document.getElementById(`opt-${tool}`);
+      if (opt) opt.classList.add('active');
+    }
+
+    // 4. Mouse Events
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      startX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      startY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      if (currentTool === 'move') {
+        isDrawing = true;
+        startOffsetX = startX - imgOffsetX;
+        startOffsetY = startY - imgOffsetY;
+      }
+      else if (currentTool === 'crop') {
+        isDrawing = true;
+      }
+      else if (currentTool === 'brush' || currentTool === 'eraser') {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+      }
+      else if (currentTool === 'fill') {
+        ctx.fillStyle = colorPicker.value;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      else if (currentTool === 'eyedropper') {
+        const p = ctx.getImageData(startX, startY, 1, 1).data;
+        const hex = "#" + ("000000" + ((p[0] << 16) | (p[1] << 8) | p[2]).toString(16)).slice(-6);
+        colorPicker.value = hex;
+      }
+      else if (currentTool === 'text') {
+        const text = prompt("أدخل النص:");
+        if (text) {
+          ctx.fillStyle = colorPicker.value;
+          ctx.font = `bold ${document.getElementById('font-size').value}px Segoe UI`;
+          ctx.fillText(text, startX, startY);
+        }
+      }
+      else if (currentTool === 'shapes') {
+        isDrawing = true;
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      if (!isDrawing) return;
+
+      if (currentTool === 'move') {
+        imgOffsetX = x - startOffsetX;
+        imgOffsetY = y - startOffsetY;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (img.src) ctx.drawImage(img, imgOffsetX, imgOffsetY);
+      }
+      else if (currentTool === 'brush') {
+        ctx.lineTo(x, y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = colorPicker.value;
+        ctx.lineWidth = document.getElementById('brush-size').value;
+        ctx.globalAlpha = document.getElementById('brush-opacity').value / 100;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      else if (currentTool === 'eraser') {
+        ctx.lineTo(x, y);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = document.getElementById('eraser-size').value;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      else if (currentTool === 'crop') {
+        if (img.src) { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, imgOffsetX, imgOffsetY); }
+        ctx.strokeStyle = '#1473e6';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(startX, startY, x - startX, y - startY);
+        ctx.setLineDash([]);
+        cropBox = { x1: startX, y1: startY, x2: x, y2: y };
+      }
+      else if (currentTool === 'shapes') {
+        if (img.src) { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, imgOffsetX, imgOffsetY); }
+        ctx.strokeStyle = colorPicker.value;
+        ctx.lineWidth = document.getElementById('shape-width').value;
+        ctx.beginPath();
+        if (document.getElementById('shape-type').value === 'rect') {
+          ctx.rect(startX, startY, x - startX, y - startY);
+        } else {
+          const r = Math.hypot(x - startX, y - startY);
+          ctx.arc(startX, startY, r, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+      ctx.closePath();
+    });
+
+    // 5. Apply Crop
+    function applyCrop() {
+      if (!cropBox) return alert('ارسم مربعاً أولاً');
+      const w = cropBox.x2 - cropBox.x1;
+      const h = cropBox.y2 - cropBox.y1;
+      
+      const temp = document.createElement('canvas');
+      temp.width = Math.abs(w);
+      temp.height = Math.abs(h);
+      temp.getContext('2d').drawImage(canvas, cropBox.x1, cropBox.y1, w, h, 0, 0, Math.abs(w), Math.abs(h));
+      
+      canvas.width = Math.abs(w);
+      canvas.height = Math.abs(h);
+      ctx.drawImage(temp, 0, 0);
+      img = new Image();
+      img.src = canvas.toDataURL();
+      imgOffsetX = 0; imgOffsetY = 0;
+      cropBox = null;
+    }
+
+    // 6. Filters
+    function applyFilters() {
+      if (!img.src) return;
+      const b = document.getElementById('f-brightness').value;
+      const c = document.getElementById('f-contrast').value;
+      const s = document.getElementById('f-saturate').value;
+      const bl = document.getElementById('f-blur').value;
+      
+      ctx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) blur(${bl}px)`;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, imgOffsetX, imgOffsetY);
+      ctx.filter = 'none';
+    }
+
+    // 7. Download
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'emaar_edit.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>

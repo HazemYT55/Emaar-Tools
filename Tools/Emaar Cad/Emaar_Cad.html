@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Emaar CAD - Working</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root {
+      --bg-ui: #2b2b2b; --bg-panel: #333333; --bg-input: #222222;
+      --border: #444444; --text-main: #dddddd; --accent: #0078d7; --canvas-bg: #1e1e1e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: var(--bg-ui); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text-main); }
+
+    .qat { background: var(--bg-panel); height: 28px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid var(--border); font-size: 12px; gap: 15px; }
+    .qat i { font-size: 16px; cursor: pointer; color: #bbb; }
+    .qat i:hover { color: white; }
+
+    .toolbar { background: #3a3a3a; padding: 10px; display: flex; border-bottom: 1px solid var(--border); height: 80px; gap: 20px; }
+    .ribbon-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); padding-right: 20px; }
+    .panel-title { font-size: 11px; color: #888; text-align: center; margin-top: auto; padding-top: 5px; }
+    .panel-tools { display: flex; gap: 5px; flex: 1; align-items: flex-start; }
+    
+    .tool-btn { background: transparent; border: 1px solid transparent; color: #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; }
+    .tool-btn i { font-size: 22px; }
+    .tool-btn:hover { background: #4a4a4a; border-color: var(--border); }
+    .tool-btn.active { background: var(--accent); color: white; }
+
+    .main-area { display: flex; flex: 1; overflow: hidden; position: relative; }
+    
+    .props-sidebar { width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .props-header { padding: 8px 10px; background: #2a2a2a; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .props-content { padding: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 15px; }
+    .prop-row { display: flex; justify-content: space-between; align-items: center; }
+    .prop-val { font-family: 'Share Tech Mono', monospace; color: var(--accent); }
+    .color-picker { width: 30px; height: 30px; border: none; padding: 0; background: none; cursor: pointer; border-radius: 4px; }
+    .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-picker::-webkit-color-swatch { border: 1px solid #555; border-radius: 4px; }
+    select { background: var(--bg-input); color: white; border: 1px solid var(--border); padding: 5px; border-radius: 4px; outline: none; }
+
+    .canvas-container { flex: 1; position: relative; background: var(--canvas-bg); overflow: hidden; cursor: crosshair; }
+    canvas { position: absolute; top: 0; left: 0; }
+    
+    .crosshair-h, .crosshair-v { position: absolute; background: rgba(255,255,255,0.2); pointer-events: none; }
+    .crosshair-h { width: 100%; height: 1px; }
+    .crosshair-v { height: 100%; width: 1px; }
+    .target-box { position: absolute; width: 12px; height: 12px; border: 1px solid white; transform: translate(-50%, -50%); pointer-events: none; }
+
+    .cmd-area { background: var(--bg-ui); border-top: 1px solid var(--border); display: flex; flex-direction: column; height: 120px; }
+    .cmd-history { flex: 1; padding: 5px 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; overflow-y: auto; color: #bbb; }
+    .cmd-input-row { display: flex; align-items: center; background: var(--bg-input); border-top: 1px solid var(--border); padding: 0 10px; }
+    .cmd-input-row span { font-family: 'Share Tech Mono', monospace; color: #00ff00; font-size: 14px; margin-right: 10px; }
+    .cmd-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 8px 0; outline: none; }
+
+    .status-bar { background: var(--bg-panel); height: 28px; display: flex; align-items: center; padding: 0 10px; border-top: 1px solid var(--border); font-size: 11px; gap: 15px; color: #aaa; }
+    .status-toggle { cursor: pointer; padding: 2px 8px; border-radius: 3px; }
+    .status-toggle:hover { background: #444; }
+    .status-toggle.active { background: #333; color: #fff; border: 1px solid #555; }
+  </style>
+</head>
+<body>
+
+  <div class="qat">
+    <i class="ph ph-floppy-disk" onclick="exportDXF()" title="Save DXF"></i>
+    <i class="ph ph-folder-open" onclick="document.getElementById('import-file').click()" title="Open DXF"></i>
+    <i class="ph ph-arrow-u-up-left" onclick="undo()" title="Undo"></i>
+    <i class="ph ph-arrow-u-up-right" onclick="redo()" title="Redo"></i>
+    <span style="margin-left: auto; font-weight: 600; color: #aaa;">Emaar CAD - Drawing1.dxf</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="ribbon-panel">
+      <div class="panel-tools">
+        <button class="tool-btn active" id="btn-line" onclick="setTool('line')"><i class="ph ph-line-segment"></i>Line</button>
+        <button class="tool-btn" id="btn-rect" onclick="setTool('rect')"><i class="ph ph-rectangle"></i>Rect</button>
+        <button class="tool-btn" id="btn-circle" onclick="setTool('circle')"><i class="ph ph-circle"></i>Circle</button>
+      </div>
+      <div class="panel-title">Draw</div>
+    </div>
+    <div class="ribbon-panel">
+      <div class="panel-tools">
+        <button class="tool-btn" id="btn-select" onclick="setTool('select')"><i class="ph ph-cursor"></i>Select</button>
+        <button class="tool-btn" id="btn-erase" onclick="setTool('erase')"><i class="ph ph-eraser"></i>Erase</button>
+        <button class="tool-btn" onclick="changeSelectedColor()"><i class="ph ph-paint-brush"></i>Recolor</button>
+      </div>
+      <div class="panel-title">Modify</div>
+    </div>
+  </div>
+
+  <div class="main-area">
+    <div class="props-sidebar">
+      <div class="props-header">Properties</div>
+      <div class="props-content">
+        <div class="prop-row"><span>Color</span><input type="color" id="draw-color" class="color-picker" value="#00ffff"></div>
+        <div class="prop-row"><span>Line Weight</span>
+          <select id="draw-weight"><option value="1">Thin</option><option value="2" selected>Default</option><option value="4">Thick</option></select>
+        </div>
+        <hr style="border-color: #444; margin: 5px 0;">
+        <div class="prop-row"><span>Selected</span> <span class="prop-val" id="prop-sel">0 Objects</span></div>
+        <div class="prop-row"><span>X Coord</span> <span class="prop-val" id="prop-x">0.00</span></div>
+        <div class="prop-row"><span>Y Coord</span> <span class="prop-val" id="prop-y">0.00</span></div>
+        <div class="prop-row"><span>OSNAP</span> <span class="prop-val" id="prop-snap" style="color:#00ff00;">None</span></div>
+        <div class="prop-row"><span>Zoom</span> <span class="prop-val" id="prop-zoom">100%</span></div>
+      </div>
+    </div>
+    <div class="canvas-container" id="container">
+      <canvas id="cad"></canvas>
+      <div class="crosshair-h" id="ch-h"></div>
+      <div class="crosshair-v" id="ch-v"></div>
+      <div class="target-box" id="target"></div>
+    </div>
+  </div>
+
+  <div class="cmd-area">
+    <div class="cmd-history" id="history"><div>Emaar CAD v12.0 (Working DXF Export)</div></div>
+    <div class="cmd-input-row"><span>Command:</span><input type="text" class="cmd-input" id="cmd-input" autocomplete="off" placeholder="L, R, C, E, U..."></div>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-toggle active" id="snap-toggle" onclick="toggleSnap()">Snap (F9)</span>
+    <span class="status-toggle" id="grid-toggle" onclick="toggleGrid()">Grid (F7)</span>
+    <span class="status-toggle" id="ortho-toggle" onclick="toggleOrtho()">Ortho (F8)</span>
+    <span class="status-toggle active" id="osnap-toggle" onclick="toggleOsnap()">OSNAP (F3)</span>
+    <span style="margin-left: auto;" id="status-coords">X: 0, Y: 0</span>
+  </div>
+
+  <input type="file" id="import-file" accept=".dxf" style="display: none;" onchange="importDXF(event)">
+
+  <script>
+    const canvas = document.getElementById('cad');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('container');
+    
+    let currentTool = 'line';
+    let entities = [];
+    let selectedEntities = [];
+    let historyStack = [];
+    let redoStack = [];
+    
+    let isDrawing = false, isSelecting = false;
+    let startX = 0, startY = 0, currentX = 0, currentY = 0;
+    let camX = 0, camY = 0, zoom = 1;
+    let snapEnabled = true, gridEnabled = true, orthoEnabled = false, osnapEnabled = true;
+    const gridSize = 20;
+
+    const colorPicker = document.getElementById('draw-color');
+    const weightPicker = document.getElementById('draw-weight');
+
+    function resize() { canvas.width = container.clientWidth; canvas.height = container.clientHeight; drawScene(); }
+    window.addEventListener('resize', resize);
+
+    function snap(val) { return snapEnabled ? Math.round(val / gridSize) * gridSize : val; }
+
+    function getOsnapPoint(mX, mY) {
+      if (!osnapEnabled) return null;
+      const snapDist = 15 / zoom;
+      let closest = null, minDist = snapDist;
+      entities.forEach(obj => {
+        const points = [];
+        if (obj.type === 'line') {
+          points.push({x: obj.x1, y: obj.y1, type: 'Endpoint'}, {x: obj.x2, y: obj.y2, type: 'Endpoint'}, {x: (obj.x1+obj.x2)/2, y: (obj.y1+obj.y2)/2, type: 'Midpoint'});
+        } else if (obj.type === 'rect') {
+          points.push({x: obj.x1, y: obj.y1, type: 'Corner'}, {x: obj.x2, y: obj.y1, type: 'Corner'}, {x: obj.x2, y: obj.y2, type: 'Corner'}, {x: obj.x1, y: obj.y2, type: 'Corner'});
+        } else if (obj.type === 'circle') {
+          points.push({x: obj.x1, y: obj.y1, type: 'Center'});
+        }
+        points.forEach(p => {
+          const dist = Math.hypot(p.x - mX, p.y - mY);
+          if (dist < minDist) { minDist = dist; closest = p; }
+        });
+      });
+      return closest;
+    }
+
+    function drawScene() {
+      ctx.fillStyle = '#1e1e1e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.save(); ctx.translate(camX, camY); ctx.scale(zoom, zoom);
+
+      if (gridEnabled) {
+        ctx.fillStyle = '#333333';
+        const startXGrid = Math.floor(-camX / zoom / gridSize) * gridSize;
+        const endXGrid = startXGrid + (canvas.width / zoom) + gridSize;
+        const startYGrid = Math.floor(-camY / zoom / gridSize) * gridSize;
+        const endYGrid = startYGrid + (canvas.height / zoom) + gridSize;
+        for (let x = startXGrid; x < endXGrid; x += gridSize) {
+          for (let y = startYGrid; y < endYGrid; y += gridSize) {
+            ctx.fillRect(x, y, 1.5/zoom, 1.5/zoom);
+          }
+        }
+      }
+
+      entities.forEach(obj => {
+        const isSelected = selectedEntities.includes(obj);
+        ctx.strokeStyle = isSelected ? '#ffffff' : obj.color;
+        ctx.lineWidth = isSelected ? (obj.weight + 2)/zoom : obj.weight/zoom;
+        ctx.beginPath();
+        if (obj.type === 'line') { ctx.moveTo(obj.x1, obj.y1); ctx.lineTo(obj.x2, obj.y2); }
+        else if (obj.type === 'rect') { ctx.rect(obj.x1, obj.y1, obj.x2 - obj.x1, obj.y2 - obj.y1); }
+        else if (obj.type === 'circle') { ctx.arc(obj.x1, obj.y1, Math.hypot(obj.x2 - obj.x1, obj.y2 - obj.y1), 0, Math.PI * 2); }
+        ctx.stroke();
+        if (isSelected) {
+          ctx.fillStyle = '#00ff00';
+          if (obj.type === 'line') { ctx.fillRect(obj.x1-3/zoom, obj.y1-3/zoom, 6/zoom, 6/zoom); ctx.fillRect(obj.x2-3/zoom, obj.y2-3/zoom, 6/zoom, 6/zoom); }
+          else { ctx.fillRect(obj.x1-3/zoom, obj.y1-3/zoom, 6/zoom, 6/zoom); }
+        }
+      });
+
+      if (isDrawing) {
+        ctx.strokeStyle = colorPicker.value; ctx.lineWidth = parseInt(weightPicker.value)/zoom; ctx.setLineDash([5/zoom, 5/zoom]);
+        ctx.beginPath();
+        if (currentTool === 'line') { ctx.moveTo(startX, startY); ctx.lineTo(currentX, currentY); }
+        else if (currentTool === 'rect') { ctx.rect(startX, startY, currentX - startX, currentY - startY); }
+        else if (currentTool === 'circle') { ctx.arc(startX, startY, Math.hypot(currentX - startX, currentY - startY), 0, Math.PI * 2); }
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+
+      if (isSelecting) {
+        ctx.strokeStyle = '#0078d7'; ctx.fillStyle = 'rgba(0, 120, 215, 0.2)'; ctx.setLineDash([2/zoom, 2/zoom]);
+        ctx.beginPath(); ctx.rect(startX, startY, currentX - startX, currentY - startY); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+      }
+      ctx.restore();
+    }
+
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+      const worldX = (mouseX - camX) / zoom, worldY = (mouseY - camY) / zoom;
+      zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+      camX = mouseX - worldX * zoom; camY = mouseY - worldY * zoom;
+      document.getElementById('prop-zoom').innerText = Math.round(zoom * 100) + '%';
+      drawScene();
+    }, { passive: false });
+
+    container.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const screenX = e.clientX - rect.left, screenY = e.clientY - rect.top;
+      document.getElementById('ch-h').style.top = screenY + 'px';
+      document.getElementById('ch-v').style.left = screenX + 'px';
+      const targetBox = document.getElementById('target');
+      targetBox.style.top = screenY + 'px'; targetBox.style.left = screenX + 'px';
+
+      let worldX = (screenX - camX) / zoom, worldY = (screenY - camY) / zoom;
+      if (snapEnabled) { worldX = snap(worldX); worldY = snap(worldY); }
+
+      const osnapPoint = getOsnapPoint(worldX, worldY);
+      if (osnapPoint) {
+        worldX = osnapPoint.x; worldY = osnapPoint.y;
+        document.getElementById('prop-snap').innerText = osnapPoint.type;
+        targetBox.style.borderColor = '#00ff00'; targetBox.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+      } else {
+        document.getElementById('prop-snap').innerText = 'None';
+        targetBox.style.borderColor = '#ffffff'; targetBox.style.backgroundColor = 'transparent';
+      }
+
+      if (orthoEnabled && (isDrawing || isSelecting)) {
+        if (Math.abs(worldX - startX) > Math.abs(worldY - startY)) worldY = startY; else worldX = startX;
+      }
+
+      document.getElementById('prop-x').innerText = worldX.toFixed(2);
+      document.getElementById('prop-y').innerText = worldY.toFixed(2);
+      document.getElementById('status-coords').innerText = `X: ${worldX.toFixed(1)}, Y: ${worldY.toFixed(1)}`;
+
+      if (isDrawing || isSelecting) { currentX = worldX; currentY = worldY; drawScene(); }
+    });
+
+    container.addEventListener('mousedown', (e) => {
+      if (e.button === 2 || e.button === 1) { isPanning = true; panStartX = e.clientX - camX; panStartY = e.clientY - camY; return; }
+      const rect = canvas.getBoundingClientRect();
+      let worldX = (e.clientX - rect.left - camX) / zoom, worldY = (e.clientY - rect.top - camY) / zoom;
+      const osnapPoint = getOsnapPoint(worldX, worldY);
+      if (osnapPoint) { worldX = osnapPoint.x; worldY = osnapPoint.y; } else if (snapEnabled) { worldX = snap(worldX); worldY = snap(worldY); }
+
+      if (currentTool === 'select') {
+        let clickedObj = null;
+        const tol = 10 / zoom;
+        for (let i = entities.length - 1; i >= 0; i--) {
+          const obj = entities[i];
+          if (Math.hypot(worldX - (obj.x1+obj.x2)/2, worldY - (obj.y1+obj.y2)/2) < tol + 20) { clickedObj = obj; break; }
+        }
+        if (clickedObj) {
+          if (e.shiftKey) { if (selectedEntities.includes(clickedObj)) selectedEntities = selectedEntities.filter(o => o !== clickedObj); else selectedEntities.push(clickedObj); }
+          else { selectedEntities = [clickedObj]; }
+          document.getElementById('prop-sel').innerText = `${selectedEntities.length} Objects`;
+          drawScene(); return;
+        } else {
+          isSelecting = true; startX = worldX; startY = worldY; currentX = worldX; currentY = worldY;
+          if (!e.shiftKey) selectedEntities = []; return;
+        }
+      }
+      if (currentTool === 'erase') {
+        for (let i = entities.length - 1; i >= 0; i--) {
+          const obj = entities[i];
+          if (Math.hypot(worldX - (obj.x1+obj.x2)/2, worldY - (obj.y1+obj.y2)/2) < 40) { saveHistory(); entities.splice(i, 1); break; }
+        }
+        drawScene(); return;
+      }
+      isDrawing = true; startX = worldX; startY = worldY; currentX = worldX; currentY = worldY;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isPanning) { isPanning = false; return; }
+      if (isSelecting) {
+        isSelecting = false;
+        const minX = Math.min(startX, currentX), maxX = Math.max(startX, currentX);
+        const minY = Math.min(startY, currentY), maxY = Math.max(startY, currentY);
+        entities.forEach(obj => {
+          const cx = (obj.x1 + obj.x2) / 2, cy = (obj.y1 + obj.y2) / 2;
+          if (cx >= minX && cx <= maxX && cy >= minY && cy <= maxY) { if (!selectedEntities.includes(obj)) selectedEntities.push(obj); }
+        });
+        document.getElementById('prop-sel').innerText = `${selectedEntities.length} Objects`;
+        drawScene(); return;
+      }
+      if (!isDrawing) return;
+      isDrawing = false;
+      if (startX !== currentX || startY !== currentY) {
+        saveHistory();
+        entities.push({ type: currentTool, x1: startX, y1: startY, x2: currentX, y2: currentY, color: colorPicker.value, weight: parseInt(weightPicker.value) });
+      }
+      drawScene();
+    });
+
+    let isPanning = false, panStartX = 0, panStartY = 0;
+    container.addEventListener('mousemove', (e) => {
+      if (isPanning) { camX = e.clientX - panStartX; camY = e.clientY - panStartY; drawScene(); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F7') { e.preventDefault(); toggleGrid(); }
+      if (e.key === 'F8') { e.preventDefault(); toggleOrtho(); }
+      if (e.key === 'F9') { e.preventDefault(); toggleSnap(); }
+      if (e.key === 'F3') { e.preventDefault(); toggleOsnap(); }
+      if (e.key === 'Delete' && selectedEntities.length > 0) {
+        saveHistory(); entities = entities.filter(obj => !selectedEntities.includes(obj));
+        selectedEntities = []; document.getElementById('prop-sel').innerText = `0 Objects`; drawScene();
+      }
+    });
+
+    document.getElementById('cmd-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = e.target.value.toUpperCase().trim();
+        document.getElementById('history').innerHTML += `<div>Command: ${val}</div>`;
+        e.target.value = '';
+        if (val === 'L') setTool('line');
+        else if (val === 'R') setTool('rect');
+        else if (val === 'C') setTool('circle');
+        else if (val === 'E') setTool('erase');
+        else if (val === 'U') undo();
+        else document.getElementById('history').innerHTML += `<div style="color:red;">Unknown command</div>`;
+      }
+    });
+
+    function setTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`btn-${tool}`);
+      if (btn) btn.classList.add('active');
+      if (tool === 'select') { selectedEntities = []; document.getElementById('prop-sel').innerText = `0 Objects`; }
+      drawScene();
+    }
+
+    function changeSelectedColor() {
+      if (selectedEntities.length === 0) return alert('Select objects first.');
+      saveHistory();
+      selectedEntities.forEach(obj => { obj.color = colorPicker.value; obj.weight = parseInt(weightPicker.value); });
+      drawScene();
+    }
+
+    function saveHistory() { historyStack.push(JSON.stringify(entities)); redoStack = []; }
+    function undo() { if (historyStack.length > 0) { redoStack.push(JSON.stringify(entities)); entities = JSON.parse(historyStack.pop()); selectedEntities = []; drawScene(); } }
+    function redo() { if (redoStack.length > 0) { historyStack.push(JSON.stringify(entities)); entities = JSON.parse(redoStack.pop()); drawScene(); } }
+    function toggleSnap() { snapEnabled = !snapEnabled; document.getElementById('snap-toggle').classList.toggle('active', snapEnabled); }
+    function toggleGrid() { gridEnabled = !gridEnabled; document.getElementById('grid-toggle').classList.toggle('active', gridEnabled); drawScene(); }
+    function toggleOrtho() { orthoEnabled = !orthoEnabled; document.getElementById('ortho-toggle').classList.toggle('active', orthoEnabled); }
+    function toggleOsnap() { osnapEnabled = !osnapEnabled; document.getElementById('osnap-toggle').classList.toggle('active', osnapEnabled); }
+
+    // REAL DXF EXPORT (ASCII DXF format - opens in AutoCAD)
+    function exportDXF() {
+      let dxf = "0\nSECTION\n2\nENTITIES\n";
+      entities.forEach(obj => {
+        if (obj.type === 'line') {
+          dxf += `0\nLINE\n8\n0\n10\n${obj.x1}\n20\n${obj.y1}\n11\n${obj.x2}\n21\n${obj.y2}\n`;
+        } else if (obj.type === 'rect') {
+          const w = obj.x2 - obj.x1, h = obj.y2 - obj.y1;
+          dxf += `0\nLINE\n8\n0\n10\n${obj.x1}\n20\n${obj.y1}\n11\n${obj.x1+w}\n21\n${obj.y1}\n`;
+          dxf += `0\nLINE\n8\n0\n10\n${obj.x1+w}\n20\n${obj.y1}\n11\n${obj.x1+w}\n21\n${obj.y1+h}\n`;
+          dxf += `0\nLINE\n8\n0\n10\n${obj.x1+w}\n20\n${obj.y1+h}\n11\n${obj.x1}\n21\n${obj.y1+h}\n`;
+          dxf += `0\nLINE\n8\n0\n10\n${obj.x1}\n20\n${obj.y1+h}\n11\n${obj.x1}\n21\n${obj.y1}\n`;
+        } else if (obj.type === 'circle') {
+          const r = Math.hypot(obj.x2 - obj.x1, obj.y2 - obj.y1);
+          dxf += `0\nCIRCLE\n8\n0\n10\n${obj.x1}\n20\n${obj.y1}\n40\n${r}\n`;
+        }
+      });
+      dxf += "0\nENDSEC\n0\nEOF\n";
+      const blob = new Blob([dxf], { type: 'application/dxf' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Drawing1.dxf'; a.click();
+    }
+
+    function importDXF(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const content = ev.target.result;
+        const lines = content.split(/\r?\n/);
+        saveHistory(); entities = [];
+        let i = 0;
+        while (i < lines.length) {
+          if (lines[i] === '0' && lines[i+1] === 'LINE') {
+            let x1=0,y1=0,x2=0,y2=0, j=i+2;
+            while (j < lines.length && lines[j] !== '0') {
+              if (lines[j] === '10') x1 = parseFloat(lines[j+1]);
+              if (lines[j] === '20') y1 = parseFloat(lines[j+1]);
+              if (lines[j] === '11') x2 = parseFloat(lines[j+1]);
+              if (lines[j] === '21') y2 = parseFloat(lines[j+1]);
+              j += 2;
+            }
+            entities.push({ type: 'line', x1, y1, x2, y2, color: '#00ffff', weight: 2 }); i = j; continue;
+          } else if (lines[i] === '0' && lines[i+1] === 'CIRCLE') {
+            let cx=0,cy=0,r=0, j=i+2;
+            while (j < lines.length && lines[j] !== '0') {
+              if (lines[j] === '10') cx = parseFloat(lines[j+1]);
+              if (lines[j] === '20') cy = parseFloat(lines[j+1]);
+              if (lines[j] === '40') r = parseFloat(lines[j+1]);
+              j += 2;
+            }
+            entities.push({ type: 'circle', x1: cx, y1: cy, x2: cx+r, y2: cy, color: '#00ffff', weight: 2 }); i = j; continue;
+          }
+          i++;
+        }
+        drawScene();
+        document.getElementById('history').innerHTML += `<div style="color:green;">DXF Imported: ${entities.length} entities</div>`;
+      };
+      reader.readAsText(file); e.target.value = '';
+    }
+
+    resize();
+  </script>
+</body>
+</html>

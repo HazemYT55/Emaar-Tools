@@ -19,7 +19,7 @@
 
     .sidebar { width: var(--sidebar-width); background: var(--surface); border-left: 1px solid var(--border); padding: 24px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; right: 0; top: 0; z-index: 100; transition: transform 0.3s ease; }
     .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
-    .brand img { height: 40px; border-radius: 8px; }
+    .brand img { height: 40px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .brand h2 { font-size: 20px; color: var(--primary); }
     .nav-links { display: flex; flex-direction: column; gap: 8px; flex: 1; }
     .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; transition: all 0.2s; cursor: pointer; }
@@ -32,18 +32,20 @@
     .user-info p { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-info span { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
     .logout-btn { background: transparent; border: none; color: #ef4444; font-size: 22px; cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
+    .logout-btn:hover { background: #fee2e2; }
 
-    .main-content { margin-right: var(--sidebar-width); flex: 1; padding: 30px 40px; }
+    .main-content { margin-right: var(--sidebar-width); flex: 1; padding: 30px 40px; transition: margin-right 0.3s ease; }
     .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
     .greeting h1 { font-size: 26px; color: var(--text-main); margin-bottom: 5px; }
     .greeting p { color: var(--text-muted); font-size: 14px; }
     .search-box { position: relative; width: 300px; }
     .search-box i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; }
-    .search-box input { width: 100%; padding: 12px 45px 12px 15px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Cairo'; font-size: 14px; outline: none; background: var(--surface); }
+    .search-box input { width: 100%; padding: 12px 45px 12px 15px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Cairo'; font-size: 14px; outline: none; transition: all 0.3s; background: var(--surface); }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
     .stats-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 30px; }
     .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; }
-    .stat-icon { width: 42px; height: 42px; background: var(--primary-light); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .stat-icon { width: 42px; height: 42px; background: var(--primary-light); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .stat-text p { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
     .stat-text strong { font-size: 16px; color: var(--text-main); }
 
@@ -51,89 +53,130 @@
     .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 20px; color: var(--primary); }
     .section-header i { color: var(--accent); font-size: 24px; }
     .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-    .app-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-decoration: none; color: var(--text-main); transition: all 0.3s ease; display: flex; align-items: flex-start; gap: 15px; }
+    .app-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-decoration: none; color: var(--text-main); transition: all 0.3s ease; display: flex; align-items: flex-start; gap: 15px; position: relative; overflow: hidden; }
     .app-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(15, 76, 129, 0.08); border-color: #cbd5e1; }
     .app-card.highlight { border: 2px solid var(--accent); background: linear-gradient(to bottom right, #ffffff, #fefce8); }
-    .app-icon { font-size: 28px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; background: var(--primary-light); color: var(--primary); border-radius: 12px; flex-shrink: 0; }
-    .app-info h3 { font-size: 17px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .app-icon { font-size: 28px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; background: var(--primary-light); color: var(--primary); border-radius: 12px; flex-shrink: 0; transition: all 0.3s; }
+    .app-card:hover .app-icon { background: var(--primary); color: white; transform: scale(1.05); }
+    .app-info h3 { font-size: 17px; color: var(--text-main); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .app-info p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-    .badge { background: #16a34a; color: white; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+    .badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+    .badge.live { background: #16a34a; }
     .app-card.hidden, .tool-section.hidden { display: none; }
+
+    .mobile-menu-btn { display: none; background: var(--surface); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-size: 24px; color: var(--primary); }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
 
     @media (max-width: 992px) {
       .sidebar { transform: translateX(100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-right: 0; padding: 20px; }
+      .mobile-menu-btn { display: block; }
+      .overlay.active { display: block; }
+      .top-header { flex-direction: column; align-items: flex-start; }
+      .search-box { width: 100%; }
     }
   </style>
 </head>
 <body>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img src="assets/logo.jpg" alt="Emaar Logo" onerror="this.style.display='none'">
       <h2>أدوات إعمار</h2>
     </div>
+
     <nav class="nav-links">
       <a href="#" class="nav-item active"><i class="ph ph-house"></i> الرئيسية</a>
+      <a href="download_area.html" class="nav-item"><i class="ph ph-download-simple"></i> تحميل التطبيق</a>
+      <a href="https://emaar-tasks.web.app" target="_blank" class="nav-item"><i class="ph ph-check-square-offset"></i> إدارة المهام</a>
     </nav>
+
     <div class="user-profile">
       <div class="avatar" id="user-avatar">H</div>
-      <div class="user-info"><p id="user-name">جاري التحميل...</p><span id="user-email">...</span></div>
-      <button id="logout-btn" class="logout-btn"><i class="ph ph-sign-out"></i></button>
+      <div class="user-info">
+        <p id="user-name">جاري التحميل...</p>
+        <span id="user-email">...</span>
+      </div>
+      <button id="logout-btn" class="logout-btn" title="تسجيل الخروج"><i class="ph ph-sign-out"></i></button>
     </div>
   </aside>
 
   <main class="main-content">
     <div class="top-header">
-      <div class="greeting"><h1 id="greeting-text">مرحباً بك 👋</h1><p>كل أدواتك في مكان واحد.</p></div>
-      <div class="search-box"><i class="ph ph-magnifying-glass"></i><input type="text" id="search-input" placeholder="ابحث..." onkeyup="filterTools()"></div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="ph ph-list"></i></button>
+        <div class="greeting">
+          <h1 id="greeting-text">مرحباً بك 👋</h1>
+          <p>اختر الأداة التي تريد البدء بها اليوم.</p>
+        </div>
+      </div>
+      <div class="search-box">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="ابحث عن أداة..." onkeyup="filterTools()">
+      </div>
+    </div>
+
+    <!-- Download Banner (Updated to .7z) -->
+    <div style="background: linear-gradient(135deg, #0f4c81, #1e3a8a); border-radius: 16px; padding: 25px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 10px 25px rgba(15,76,129,0.2); flex-wrap: wrap; gap: 15px;">
+      <div>
+        <h2 style="font-size: 22px; margin-bottom: 5px;">🚀 احصل على تطبيق سطح المكتب</h2>
+        <p style="color: #e0f2fe; font-size: 14px;">قم بتحميل نسخة الويندوز لتشغيل جميع الأدوات بدون متصفح.</p>
+      </div>
+      <a href="download apps/Windows_Download.7z" download style="background: white; color: #0f4c81; text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <i class="ph ph-windows-logo" style="font-size: 20px;"></i> تحميل للويندوز (7Z)
+      </a>
     </div>
 
     <div class="stats-strip">
-      <div class="stat-card"><div class="stat-icon"><i class="ph ph-squares-four"></i></div><div class="stat-text"><p>الأدوات المتاحة</p><strong>15</strong></div></div>
-      <div class="stat-card"><div class="stat-icon"><i class="ph ph-buildings"></i></div><div class="stat-text"><p>الشركة</p><strong>إعمار الخليج</strong></div></div>
-    </div>
-
-    <!-- SECTION 1: Productivity -->
-    <div class="tool-section">
-      <h2 class="section-header"><i class="ph ph-briefcase"></i> الإنتاجية والمستندات</h2>
-      <div class="apps-grid">
-        <a href="Tools/Emaar Text/Emaar_Text.html" class="app-card highlight"><div class="app-icon">📝</div><div class="app-info"><h3>Emaar Text <span class="badge">متاح</span></h3><p>محرر النصوص.</p></div></a>
-        <a href="Tools/Emaar Sheet/Emaar_Sheet.html" class="app-card highlight"><div class="app-icon">📊</div><div class="app-info"><h3>Emaar Sheet <span class="badge">متاح</span></h3><p>جداول البيانات.</p></div></a>
-        <a href="Tools/Emaar Show/Emaar_Show.html" class="app-card highlight"><div class="app-icon">🎬</div><div class="app-info"><h3>Emaar Show <span class="badge">متاح</span></h3><p>عروض تقديمية.</p></div></a>
-        <a href="Tools/Emaar Forms/Emaar_Forms.html" class="app-card highlight"><div class="app-icon">📋</div><div class="app-info"><h3>Emaar Forms <span class="badge">متاح</span></h3><p>نماذج واستبيانات.</p></div></a>
-        <a href="Tools/Emaar Notes/Emaar_Notes.html" class="app-card highlight"><div class="app-icon">🗒️</div><div class="app-info"><h3>Emaar Notes <span class="badge">متاح</span></h3><p>ملاحظات لاصقة.</p></div></a>
-        <a href="Tools/Emaar PDF/Emaar_PDF.html" class="app-card highlight"><div class="app-icon">📄</div><div class="app-info"><h3>Emaar PDF <span class="badge">متاح</span></h3><p>محول الصور إلى PDF.</p></div></a>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="ph ph-squares-four"></i></div>
+        <div class="stat-text"><p>الأدوات المتاحة</p><strong>18</strong></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="ph ph-buildings"></i></div>
+        <div class="stat-text"><p>الشركة</p><strong>إعمار الخليج</strong></div>
       </div>
     </div>
 
-    <!-- SECTION 2: Media & Comm -->
+    <!-- SECTION 1 -->
+    <div class="tool-section" id="tools">
+      <h2 class="section-header"><i class="ph ph-briefcase"></i> الإنتاجية والمستندات</h2>
+      <div class="apps-grid">
+        <a href="Tools/Emaar Text/Emaar_Text.html" class="app-card highlight"><div class="app-icon">📝</div><div class="app-info"><h3>Emaar Text <span class="badge live">متاح</span></h3><p>محرر النصوص.</p></div></a>
+        <a href="Tools/Emaar Sheet/Emaar_Sheet.html" class="app-card highlight"><div class="app-icon">📊</div><div class="app-info"><h3>Emaar Sheet <span class="badge live">متاح</span></h3><p>جداول البيانات.</p></div></a>
+        <a href="Tools/Emaar Show/Emaar_Show.html" class="app-card highlight"><div class="app-icon">🎬</div><div class="app-info"><h3>Emaar Show <span class="badge live">متاح</span></h3><p>عروض تقديمية.</p></div></a>
+        <a href="Tools/Emaar Forms/Emaar_Forms.html" class="app-card highlight"><div class="app-icon">📋</div><div class="app-info"><h3>Emaar Forms <span class="badge live">متاح</span></h3><p>نماذج واستبيانات.</p></div></a>
+        <a href="Tools/Emaar Notes/Emaar_Notes.html" class="app-card highlight"><div class="app-icon">🗒️</div><div class="app-info"><h3>Emaar Notes <span class="badge live">متاح</span></h3><p>ملاحظات لاصقة.</p></div></a>
+        <a href="Tools/Emaar PDF/Emaar_PDF.html" class="app-card highlight"><div class="app-icon">📄</div><div class="app-info"><h3>Emaar PDF <span class="badge live">متاح</span></h3><p>محول الصور إلى PDF.</p></div></a>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
     <div class="tool-section">
       <h2 class="section-header"><i class="ph ph-chats-circle"></i> الوسائط والتواصل</h2>
       <div class="apps-grid">
-        <a href="Tools/Emaar Chat/Emaar_Chat.html" class="app-card highlight"><div class="app-icon">💬</div><div class="app-info"><h3>Emaar Chat <span class="badge">متاح</span></h3><p>محادثات فورية.</p></div></a>
-        <a href="Tools/Emaar Mail/Emaar_Mail.html" class="app-card highlight"><div class="app-icon">📧</div><div class="app-info"><h3>Emaar Mail <span class="badge">متاح</span></h3><p>بريد إلكتروني داخلي.</p></div></a>
-        <a href="Tools/Emaar Tube/Emaar_Tube.html" class="app-card highlight"><div class="app-icon">🎥</div><div class="app-info"><h3>Emaar Tube <span class="badge">متاح</span></h3><p>مكتبة فيديو.</p></div></a>
-        <!-- NEW APP 1 -->
-        <a href="Tools/Emaar_Posts.html" class="app-card highlight"><div class="app-icon">𝕏</div><div class="app-info"><h3>Emaar Posts <span class="badge">متاح</span></h3><p>منصة منشورات اجتماعية.</p></div></a>
+        <a href="Tools/Emaar Chat/Emaar_Chat.html" class="app-card highlight"><div class="app-icon">💬</div><div class="app-info"><h3>Emaar Chat <span class="badge live">متاح</span></h3><p>محادثات فورية.</p></div></a>
+        <a href="Tools/Emaar Mail/Emaar_Mail.html" class="app-card highlight"><div class="app-icon">📧</div><div class="app-info"><h3>Emaar Mail <span class="badge live">متاح</span></h3><p>بريد إلكتروني داخلي.</p></div></a>
+        <a href="Tools/Emaar Tube/Emaar_Tube.html" class="app-card highlight"><div class="app-icon">🎥</div><div class="app-info"><h3>Emaar Tube <span class="badge live">متاح</span></h3><p>مكتبة فيديو.</p></div></a>
+        <a href="Tools/Emaar Posts/Emaar_Posts.html" class="app-card highlight"><div class="app-icon">𝕏</div><div class="app-info"><h3>Emaar Posts <span class="badge live">متاح</span></h3><p>منصة منشورات اجتماعية.</p></div></a>
       </div>
     </div>
 
-    <!-- SECTION 3: Utilities -->
+    <!-- SECTION 3 -->
     <div class="tool-section">
       <h2 class="section-header"><i class="ph ph-wrench"></i> أدوات مساعدة</h2>
       <div class="apps-grid">
-        <a href="Tools/Emaar Calc/Emaar_Calc.html" class="app-card highlight"><div class="app-icon">🧮</div><div class="app-info"><h3>Emaar Calc <span class="badge">متاح</span></h3><p>آلة حاسبة ومحول عملات.</p></div></a>
-        <a href="Tools/Emaar Calendar/Emaar_Calendar.html" class="app-card highlight"><div class="app-icon">📅</div><div class="app-info"><h3>Emaar Calendar <span class="badge">متاح</span></h3><p>تقويم ومواعيد.</p></div></a>
-        <a href="Tools/Emaar Clock/Emaar_Clock.html" class="app-card highlight"><div class="app-icon">⏱️</div><div class="app-info"><h3>Emaar Clock <span class="badge">متاح</span></h3><p>ساعة ومؤقت.</p></div></a>
-        <a href="Tools/Emaar QR/Emaar_QR.html" class="app-card highlight"><div class="app-icon">📱</div><div class="app-info"><h3>Emaar QR <span class="badge">متاح</span></h3><p>مولد باركود.</p></div></a>
-        <a href="Tools/Emaar Pass/Emaar_Pass.html" class="app-card highlight"><div class="app-icon">🔐</div><div class="app-info"><h3>Emaar Pass <span class="badge">متاح</span></h3><p>مولد كلمات مرور آمنة.</p></div></a>
-        <a href="Tools/Emaar AI/Emaar_AI.html" class="app-card highlight"><div class="app-icon">🧠</div><div class="app-info"><h3>Emaar AI <span class="badge">متاح</span></h3><p>المساعد الذكي المحلي.</p></div></a>
-        <!-- NEW APP 2 -->
-        <a href="Tools/Emaar_Cad.html" class="app-card highlight"><div class="app-icon">📐</div><div class="app-info"><h3>Emaar Cad <span class="badge">متاح</span></h3><p>أداة رسم هندسي 2D.</p></div></a>
-        <!-- NEW APP 3 -->
-        <a href="Tools/Emaar_Pic.html" class="app-card highlight"><div class="app-icon">🖼️</div><div class="app-info"><h3>Emaar Pic <span class="badge">متاح</span></h3><p>محرر صور وفلاتر.</p></div></a>
+        <a href="Tools/Emaar Calc/Emaar_Calc.html" class="app-card highlight"><div class="app-icon">🧮</div><div class="app-info"><h3>Emaar Calc <span class="badge live">متاح</span></h3><p>آلة حاسبة ومحول عملات.</p></div></a>
+        <a href="Tools/Emaar Calendar/Emaar_Calendar.html" class="app-card highlight"><div class="app-icon">📅</div><div class="app-info"><h3>Emaar Calendar <span class="badge live">متاح</span></h3><p>تقويم ومواعيد.</p></div></a>
+        <a href="Tools/Emaar Clock/Emaar_Clock.html" class="app-card highlight"><div class="app-icon">⏱️</div><div class="app-info"><h3>Emaar Clock <span class="badge live">متاح</span></h3><p>ساعة ومؤقت.</p></div></a>
+        <a href="Tools/Emaar QR/Emaar_QR.html" class="app-card highlight"><div class="app-icon">📱</div><div class="app-info"><h3>Emaar QR <span class="badge live">متاح</span></h3><p>مولد باركود.</p></div></a>
+        <a href="Tools/Emaar Pass/Emaar_Pass.html" class="app-card highlight"><div class="app-icon">🔐</div><div class="app-info"><h3>Emaar Pass <span class="badge live">متاح</span></h3><p>مولد كلمات مرور آمنة.</p></div></a>
+        <a href="Tools/Emaar AI/Emaar_AI.html" class="app-card highlight"><div class="app-icon">🧠</div><div class="app-info"><h3>Emaar AI <span class="badge live">متاح</span></h3><p>المساعد الذكي المحلي.</p></div></a>
+        <a href="Tools/Emaar Cad/Emaar_Cad.html" class="app-card highlight"><div class="app-icon">📐</div><div class="app-info"><h3>Emaar Cad <span class="badge live">متاح</span></h3><p>أداة رسم هندسي.</p></div></a>
+        <a href="Tools/Emaar Pic/Emaar_Pic.html" class="app-card highlight"><div class="app-icon">🖼️</div><div class="app-info"><h3>Emaar Pic <span class="badge live">متاح</span></h3><p>محرر صور وفلاتر.</p></div></a>
       </div>
     </div>
   </main>
@@ -175,6 +218,11 @@
     document.getElementById('logout-btn').addEventListener('click', () => {
       signOut(auth).then(() => { window.location.href = "login.html"; });
     });
+
+    window.toggleSidebar = function() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('active');
+    }
 
     window.filterTools = function() {
       const query = document.getElementById('search-input').value.trim().toLowerCase();

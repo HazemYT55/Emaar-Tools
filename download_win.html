@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحميل تطبيق إعمار للويندوز</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  
+  <style>
+    :root { 
+      --primary: #0f4c81; 
+      --accent: #d4af37; 
+      --bg: #f4f7f9; 
+      --text-main: #1e293b; 
+      --text-muted: #64748b; 
+    }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { 
+      background: var(--bg); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      color: var(--text-main); 
+    }
+    
+    .download-card { 
+      background: white; 
+      padding: 40px; 
+      border-radius: 24px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+      text-align: center; 
+      max-width: 450px; 
+      width: 100%;
+      border-top: 8px solid var(--primary); 
+    }
+    .icon { font-size: 70px; color: var(--primary); margin-bottom: 15px; }
+    h1 { font-size: 26px; margin-bottom: 10px; }
+    p { color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; font-size: 14px; }
+    
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    
+    .btn-download { 
+      background: var(--primary); 
+      color: white; 
+      text-decoration: none; 
+      padding: 14px; 
+      border-radius: 10px; 
+      font-size: 16px; 
+      font-weight: 700; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      gap: 10px; 
+      transition: 0.3s; 
+    }
+    .btn-download:hover { background: #0d3f6b; transform: translateY(-2px); }
+    
+    .btn-7z { background: #333; }
+    .btn-7z:hover { background: #111; }
+
+    .btn-web { 
+      background: transparent; 
+      color: var(--text-muted); 
+      text-decoration: none; 
+      font-size: 13px; 
+      font-weight: 600; 
+      transition: 0.3s; 
+      display: block;
+      margin-top: 15px;
+    }
+    .btn-web:hover { color: var(--primary); }
+    
+    .version-info { font-size: 11px; color: #94a3b8; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+  </style>
+</head>
+<body>
+
+  <div class="download-card">
+    <i class="ph ph-windows-logo icon"></i>
+    <h1>تطبيق إعمار للويندوز</h1>
+    <p>احصل على جميع أدوات إعمار الـ 18 في تطبيق سطح مكتب واحد. اختر صيغة التحميل المناسبة لك:</p>
+    
+    <div class="btn-group">
+      <!-- ZIP Button (For Windows/Mac built-in support) -->
+      <a href="download apps/Windows download.zip" class="btn-download" download>
+        <i class="ph ph-file-zip"></i> تحميل النسخة (ZIP)
+      </a>
+
+      <!-- 7Z Button (Smaller size, requires 7-Zip) -->
+      <a href="download apps/Windows download.7z" class="btn-download btn-7z" download>
+        <i class="ph ph-file-archive"></i> تحميل النسخة (7Z)
+      </a>
+    </div>
+    
+    <a href="index.html" class="btn-web">أو استخدم النسخة السحابية (الويب) من هنا</a>
+    
+    <div class="version-info">
+      الإصدار 1.0.0 | متوافق مع Windows 10/11<br>
+      (صيغة ZIP تُفتح مباشرة، صيغة 7Z أصغر حجماً وتحتاج برنامج 7-Zip)
+    </div>
+  </div>
+
+</body>
+</html>
