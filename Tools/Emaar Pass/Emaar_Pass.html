@@ -1,79 +1,77 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emaar Pass - Emaar Tools</title>
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
-<style>
-:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
-body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-header .ic{font-size:26px;}
-header h1{font-size:19px;font-weight:600;}
-header p{font-size:12px;opacity:.85;}
-.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
-.back:hover{background:rgba(255,255,255,.3);}
-main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
-.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
-.btn:hover{background:var(--primary2);}
-.btn.gold{background:var(--gold);color:#3b2f00;}
-.btn.gray{background:#e2e8f0;color:var(--text);}
-.btn.red{background:#ef4444;}
-input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
-input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
-.row>*{flex:1;min-width:120px;}
-.note{font-size:12px;color:var(--muted);margin-top:8px;}
-h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
-</style>
+  <meta charset="UTF-8"><title>Emaar Pass - كلمات المرور</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root { --primary: #0f4c81; --bg: #f4f7f9; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; border-top: 8px solid var(--primary); }
+    h1 { color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .pass-box { background: #f8fafc; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 24px; font-weight: bold; margin-bottom: 20px; word-break: break-all; color: #1e293b; position: relative; }
+    .btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: 600; font-size: 16px; width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .options { text-align: right; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
+    .option-row { display: flex; justify-content: space-between; align-items: center; }
+    input[type="range"] { width: 200px; }
+    .copy-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; cursor: pointer; color: var(--primary); }
+  </style>
 </head>
 <body>
-<header>
-<span class="ic">🔐</span>
-<div><h1>Emaar Pass</h1><p>مولّد كلمات مرور آمنة</p></div>
-<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
-</header>
-<main>
+  <div class="card">
+    <h1><i class="ph ph-lock-key"></i> كلمات المرور (Emaar Pass)</h1>
+    
+    <div class="pass-box">
+      <span id="password">اضغط توليد...</span>
+      <button class="copy-btn" onclick="copyPass()" title="نسخ"><i class="ph ph-copy"></i></button>
+    </div>
 
-<div class="card"><h2>إنشاء كلمة مرور</h2>
-<div class="row">
-<div><label>الطول: <span id="lenv">16</span></label><input type="range" id="len" min="6" max="40" value="16" style="width:100%;" oninput="document.getElementById('lenv').textContent=this.value;gen()"></div>
-</div>
-<div class="row" style="margin-top:8px;">
-<label style="flex:0"><input type="checkbox" id="cu" checked onchange="gen()"> أحرف كبيرة</label>
-<label style="flex:0"><input type="checkbox" id="cl" checked onchange="gen()"> أحرف صغيرة</label>
-<label style="flex:0"><input type="checkbox" id="cd" checked onchange="gen()"> أرقام</label>
-<label style="flex:0"><input type="checkbox" id="cs" checked onchange="gen()"> رموز</label>
-</div></div>
-<div class="card" style="text-align:center;">
-<div id="pw" style="font-size:22px;font-weight:700;direction:ltr;word-break:break-all;background:#f1f5f9;padding:16px;border-radius:8px;font-family:monospace;"></div>
-<div style="height:8px;background:#e2e8f0;border-radius:4px;margin:12px 0;"><div id="bar" style="height:100%;border-radius:4px;transition:width .3s;"></div></div>
-<div id="str" style="font-size:13px;color:var(--muted);"></div>
-<div style="margin-top:12px;">
-<button class="btn" onclick="gen()"><i class="ph ph-arrows-clockwise"></i> توليد جديدة</button>
-<button class="btn gold" onclick="copyPw()"><i class="ph ph-copy"></i> نسخ</button>
-</div><p class="note">التوليد يتم على جهازك بالكامل ولا تُرسل كلمة المرور لأي مكان.</p></div>
+    <button class="btn" onclick="generate()"><i class="ph ph-arrows-clockwise"></i> توليد كلمة مرور جديدة</button>
 
-</main>
-<script>
-function gen(){
- const sets={u:'ABCDEFGHJKLMNPQRSTUVWXYZ',l:'abcdefghijkmnpqrstuvwxyz',d:'23456789',s:'!@#$%^&*()-_=+[]{}'};
- let pool='';if(cu.checked)pool+=sets.u;if(cl.checked)pool+=sets.l;if(cd.checked)pool+=sets.d;if(cs.checked)pool+=sets.s;
- if(!pool){document.getElementById('pw').textContent='اختر نوعاً واحداً على الأقل';return;}
- const n=+document.getElementById('len').value;const arr=new Uint32Array(n);crypto.getRandomValues(arr);
- let pw='';for(let i=0;i<n;i++)pw+=pool[arr[i]%pool.length];
- document.getElementById('pw').textContent=pw;
- let bits=n*Math.log2(pool.length);
- const bar=document.getElementById('bar');const pct=Math.min(100,bits/128*100);
- bar.style.width=pct+'%';bar.style.background=bits<50?'#ef4444':bits<80?'#f59e0b':'#22c55e';
- document.getElementById('str').textContent='القوة التقريبية: '+Math.round(bits)+' بت — '+(bits<50?'ضعيفة':bits<80?'جيدة':'قوية جداً');}
-function copyPw(){navigator.clipboard.writeText(document.getElementById('pw').textContent).then(()=>alert('نُسخت!'));}
-const cu=document.getElementById('cu'),cl=document.getElementById('cl'),cd=document.getElementById('cd'),cs=document.getElementById('cs');
-gen();
-</script>
+    <div class="options">
+      <div class="option-row">
+        <label>طول كلمة المرور: <span id="len-val">16</span></label>
+        <input type="range" id="length" min="8" max="64" value="16" oninput="document.getElementById('len-val').innerText = this.value">
+      </div>
+      <div class="option-row">
+        <label>تضمين الأرقام (0-9)</label>
+        <input type="checkbox" id="inc-numbers" checked>
+      </div>
+      <div class="option-row">
+        <label>تضمين الرموز (!@#$)</label>
+        <input type="checkbox" id="inc-symbols" checked>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generate() {
+      const len = document.getElementById('length').value;
+      const incNums = document.getElementById('inc-numbers').checked;
+      const incSym = document.getElementById('inc-symbols').checked;
+
+      let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      if (incNums) chars += "0123456789";
+      if (incSym) chars += "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+
+      let pass = "";
+      for (let i = 0; i < len; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      document.getElementById('password').innerText = pass;
+    }
+
+    function copyPass() {
+      const pass = document.getElementById('password').innerText;
+      if (pass === 'اضغط توليد...') return;
+      navigator.clipboard.writeText(pass).then(() => {
+        alert('تم نسخ كلمة المرور بنجاح! 📋');
+      });
+    }
+
+    generate(); // Generate one on load
+  </script>
 </body>
 </html>
