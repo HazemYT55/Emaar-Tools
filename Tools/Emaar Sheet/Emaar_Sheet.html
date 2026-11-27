@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Sheet - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">📊</span>
+<div><h1>Emaar Sheet</h1><p>جداول بيانات بسيطة</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card">
+<div class="row" style="margin-bottom:10px;">
+<div style="flex:0"><button class="btn" onclick="csv()"><i class="ph ph-download-simple"></i> تصدير CSV</button></div>
+<div style="flex:0"><button class="btn gray" onclick="addRow()"><i class="ph ph-plus"></i> صف</button></div>
+<div style="flex:0"><button class="btn gray" onclick="addCol()"><i class="ph ph-plus"></i> عمود</button></div>
+<div style="flex:0"><button class="btn red" onclick="clr()">تفريغ</button></div>
+</div>
+<div style="overflow:auto;"><table id="tb" style="border-collapse:collapse;width:100%;direction:ltr;"></table></div>
+<p class="note">انقر أي خلية للتعديل. اكتب = في بداية الخلية ثم عملية حسابية (مثال: =5*12) لحسابها. الصف الأخير يجمع الأعمدة الرقمية تلقائياً.</p>
+</div>
+
+</main>
+<script>
+let R=8,C=5,data=JSON.parse(localStorage.getItem('et_sheet')||'null')||{};
+const tb=document.getElementById('tb');
+const colName=i=>String.fromCharCode(65+i);
+function cell(r,c){return data[r+'_'+c]||'';}
+function val(r,c){let v=cell(r,c);
+ if(typeof v==='string'&&v.startsWith('=')){try{return Function('return('+v.slice(1).replace(/[^0-9+\-*/.() ]/g,'')+')')();}catch(e){return '#خطأ';}}
+ return v;}
+function render(){tb.innerHTML='';
+ let hr=tb.insertRow();hr.insertCell().style.cssText=hstyle();
+ for(let c=0;c<C;c++){const h=hr.insertCell();h.textContent=colName(c);h.style.cssText=hstyle()+'font-weight:700;text-align:center;';}
+ for(let r=0;r<R;r++){const row=tb.insertRow();
+  const rh=row.insertCell();rh.textContent=r+1;rh.style.cssText=hstyle()+'font-weight:700;text-align:center;';
+  for(let c=0;c<C;c++){const td=row.insertCell();td.contentEditable=true;td.textContent=cell(r,c);
+   td.style.cssText='border:1px solid var(--border);padding:6px 8px;min-width:90px;';
+   td.onblur=()=>{data[r+'_'+c]=td.textContent;localStorage.setItem('et_sheet',JSON.stringify(data));renderSums();};}}
+ const sr=tb.insertRow();const lh=sr.insertCell();lh.textContent='Σ';lh.style.cssText=hstyle()+'font-weight:700;text-align:center;background:#e0f2fe;';
+ for(let c=0;c<C;c++){const td=sr.insertCell();td.id='sum'+c;td.style.cssText='border:1px solid var(--border);padding:6px 8px;font-weight:700;background:#e0f2fe;text-align:center;';}
+ renderSums();}
+function hstyle(){return 'border:1px solid var(--border);padding:6px 8px;background:#f1f5f9;';}
+function renderSums(){for(let c=0;c<C;c++){let s=0,ok=false;
+ for(let r=0;r<R;r++){const v=parseFloat(val(r,c));if(!isNaN(v)){s+=v;ok=true;}}
+ document.getElementById('sum'+c).textContent=ok?(Math.round(s*100)/100):'';}}
+function addRow(){R++;render();}
+function addCol(){C++;render();}
+function clr(){if(confirm('تفريغ الجدول بالكامل؟')){data={};localStorage.setItem('et_sheet','{}');render();}}
+function csv(){let out=[];
+ out.push(Array.from({length:C},(_,c)=>colName(c)).join(','));
+ for(let r=0;r<R;r++)out.push(Array.from({length:C},(_,c)=>{let v=String(val(r,c));return v.includes(',')?'"'+v+'"':v;}).join(','));
+ const b=new Blob(['\ufeff'+out.join('\n')],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='جدول.csv';a.click();}
+render();
+</script>
+</body>
+</html>
