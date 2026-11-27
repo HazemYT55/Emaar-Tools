@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Chat - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">💬</span>
+<div><h1>Emaar Chat</h1><p>محادثة فورية محلية</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card">
+<p class="note" style="margin-bottom:10px;">دردشة فورية بين نوافذ وتبويبات هذه الصفحة على نفس الجهاز (افتح الصفحة في نافذتين وجرب). لا تُرسل الرسائل عبر الإنترنت.</p>
+<div class="row" style="margin-bottom:10px;">
+<div><label>اسمك</label><input type="text" id="nick" placeholder="اسمك"></div>
+<div style="flex:0"><button class="btn gray" onclick="clr()">مسح السجل</button></div>
+</div>
+<div id="log" style="height:45vh;overflow-y:auto;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px;"></div>
+<div class="row" style="margin-top:10px;">
+<div style="flex:4"><input type="text" id="msg" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter')send()"></div>
+<div style="flex:0"><button class="btn" onclick="send()"><i class="ph ph-paper-plane-right"></i> إرسال</button></div>
+</div></div>
+
+</main>
+<script>
+const bc='BroadcastChannel' in window?new BroadcastChannel('et_chat'):null;
+let log=JSON.parse(localStorage.getItem('et_chat')||'[]');
+const nick=localStorage.getItem('et_nick')||'';
+document.getElementById('nick').value=nick;
+function render(){const l=document.getElementById('log');l.innerHTML='';
+ log.forEach(m=>{const d=document.createElement('div');const mine=m.n===document.getElementById('nick').value;
+  d.style.cssText='margin-bottom:8px;text-align:'+(mine?'left':'right')+';';
+  d.innerHTML='<div style="display:inline-block;max-width:75%;padding:8px 12px;border-radius:12px;background:'+(mine?'var(--primary)':'#fff')+';color:'+(mine?'#fff':'var(--text)')+';border:1px solid var(--border);"><div style="font-size:11px;opacity:.7;">'+m.n+' · '+m.t+'</div>'+m.x+'</div>';
+  l.appendChild(d);});
+ l.scrollTop=l.scrollHeight;}
+function send(){const n=document.getElementById('nick').value.trim()||'مجهول';
+ localStorage.setItem('et_nick',n);
+ const x=document.getElementById('msg').value.trim();if(!x)return;
+ const m={n,x,t:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})};
+ log.push(m);localStorage.setItem('et_chat',JSON.stringify(log));
+ if(bc)bc.postMessage(m);
+ document.getElementById('msg').value='';render();}
+if(bc)bc.onmessage=e=>{log.push(e.data);localStorage.setItem('et_chat',JSON.stringify(log));render();};
+function clr(){if(confirm('مسح سجل المحادثة؟')){log=[];localStorage.setItem('et_chat','[]');render();}}
+render();
+</script>
+</body>
+</html>
