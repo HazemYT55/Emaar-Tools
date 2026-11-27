@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Show - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">🎬</span>
+<div><h1>Emaar Show</h1><p>عروض تقديمية بسيطة</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap;">
+<div class="card" style="flex:0 0 220px;">
+<button class="btn" style="width:100%;margin-bottom:10px;" onclick="addSlide()"><i class="ph ph-plus"></i> شريحة جديدة</button>
+<div id="slist"></div>
+</div>
+<div class="card" style="flex:1;min-width:280px;">
+<label>عنوان الشريحة</label><input type="text" id="stitle" oninput="sync()">
+<label style="margin-top:10px;">النص</label><textarea id="sbody" rows="6" oninput="sync()"></textarea>
+<div class="row" style="margin-top:12px;">
+<div style="flex:0"><button class="btn gold" onclick="present()"><i class="ph ph-play"></i> عرض</button></div>
+<div style="flex:0"><button class="btn red" onclick="delSlide()">حذف الشريحة</button></div>
+</div></div></div>
+<div id="stage" style="display:none;position:fixed;inset:0;background:#0f172a;color:#fff;z-index:50;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px;cursor:pointer;" onclick="nextS()">
+<h1 id="pt" style="font-size:44px;margin-bottom:24px;color:var(--gold);"></h1>
+<p id="pb" style="font-size:24px;max-width:800px;line-height:1.8;white-space:pre-wrap;"></p>
+<div style="position:absolute;top:16px;left:16px;font-size:13px;opacity:.6;">انقر للتالي · Esc للخروج</div>
+</div>
+
+</main>
+<script>
+let slides=JSON.parse(localStorage.getItem('et_show')||'null')||[{t:'مرحباً',b:'عرضي التقديمي الأول'}];
+let cur=0,pi=0;
+function save(){localStorage.setItem('et_show',JSON.stringify(slides));}
+function render(){const l=document.getElementById('slist');l.innerHTML='';
+ slides.forEach((s,i)=>{const d=document.createElement('div');
+  d.style.cssText='padding:8px 10px;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid '+(i===cur?'var(--primary)':'var(--border)')+';background:'+(i===cur?'#e0f2fe':'#fff')+';font-size:13px;';
+  d.textContent=(i+1)+'. '+(s.t||'بدون عنوان');d.onclick=()=>{cur=i;render();};l.appendChild(d);});
+ document.getElementById('stitle').value=slides[cur].t;document.getElementById('sbody').value=slides[cur].b;}
+function sync(){slides[cur]={t:document.getElementById('stitle').value,b:document.getElementById('sbody').value};save();
+ document.getElementById('slist').children[cur].textContent=(cur+1)+'. '+(slides[cur].t||'بدون عنوان');}
+function addSlide(){slides.push({t:'شريحة '+(slides.length+1),b:''});cur=slides.length-1;save();render();}
+function delSlide(){if(slides.length<=1)return alert('يجب أن تبقى شريحة واحدة على الأقل');
+ slides.splice(cur,1);cur=Math.max(0,cur-1);save();render();}
+function present(){pi=0;showSlide();const st=document.getElementById('stage');st.style.display='flex';st.requestFullscreen&&st.requestFullscreen();}
+function showSlide(){document.getElementById('pt').textContent=slides[pi].t;document.getElementById('pb').textContent=slides[pi].b;}
+function nextS(){pi++;if(pi>=slides.length){document.getElementById('stage').style.display='none';document.exitFullscreen&&document.exitFullscreen();return;}showSlide();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('stage').style.display='none';});
+render();
+</script>
+</body>
+</html>
