@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar AI - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">🧠</span>
+<div><h1>Emaar AI</h1><p>مساعد ذكي محلي بسيط</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card">
+<p class="note" style="margin-bottom:10px;">مساعد بسيط يعمل على جهازك بالكامل (قواعد محلية، بلا إنترنت ولا ذكاء اصطناعي سحابي). يفهم: السلام، الوقت والتاريخ، العمليات الحسابية (اكتب: احسب 5*12)، اقتراح أداة، عد الكلمات.</p>
+<div id="log" style="height:50vh;overflow-y:auto;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px;"></div>
+<div class="row" style="margin-top:10px;">
+<div style="flex:4"><input type="text" id="q" placeholder="اسألني شيئاً..." onkeydown="if(event.key==='Enter')ask()"></div>
+<div style="flex:0"><button class="btn" onclick="ask()"><i class="ph ph-paper-plane-right"></i> إرسال</button></div>
+</div></div>
+
+</main>
+<script>
+function bot(q){
+ const s=q.trim();const low=s.toLowerCase();
+ if(/سلام|اهلا|أهلا|هلا|مرحبا/.test(s))return 'أهلاً وسهلاً! كيف أقدر أساعدك اليوم؟';
+ if(/كيف حالك|عامل ايه|عامل إيه/.test(s))return 'الحمد لله تمام، وأنت؟ جرب تسألني: احسب 25*4، أو: كم الساعة؟';
+ if(/ساعة|الوقت/.test(s))return 'الساعة الآن '+new Date().toLocaleTimeString('ar-EG')+'.';
+ if(/تاريخ|اليوم|يوم/.test(s))return 'اليوم '+new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'.';
+ let m=s.match(/احسب\s+(.+)/);
+ if(m){try{const e=m[1].replace(/[^0-9+\-*/.() ]/g,'');return 'النتيجة: '+Function('return('+e+')')();}catch(err){return 'لم أستطع حساب ذلك. اكتب العملية بأرقام ورموز فقط.';}}
+ m=s.match(/عد\s+كلمات\s+(.+)/);
+ if(m)return 'عدد الكلمات: '+(m[1].trim().split(/\s+/).length)+'، وعدد الأحرف: '+m[1].length+'.';
+ if(/حاسب|حساب|ارقام|أرقام/.test(s))return 'أنصحك بأداة Emaar Calc من الصفحة الرئيسية، فيها آلة حاسبة ومحول عملات.';
+ if(/صور|صورة|فلتر/.test(s))return 'جرّب Emaar Pic لتحرير الصور، أو Emaar PDF لتحويل الصور إلى ملف PDF.';
+ if(/كلمة مرور|باسورد|سر/.test(s))return 'Emaar Pass يولّد لك كلمات مرور قوية على جهازك مباشرة.';
+ if(/شكرا|شكراً/.test(s))return 'العفو! في الخدمة دائماً.';
+ if(/من انت|من أنت|مين انت/.test(s))return 'أنا Emaar AI، مساعد محلي بسيط داخل Emaar Tools، أعمل بقواعد جاهزة على جهازك.';
+ return 'لم أفهم بعد. جرب: «احسب 12*8»، «كم الساعة»، «ما التاريخ اليوم»، أو اسألني عن أداة مناسبة.';}
+function push(w,txt){const d=document.createElement('div');
+ d.style.cssText='margin-bottom:8px;text-align:'+(w==='me'?'left':'right')+';';
+ d.innerHTML='<div style="display:inline-block;max-width:80%;padding:8px 12px;border-radius:12px;background:'+(w==='me'?'var(--primary)':'#fff')+';color:'+(w==='me'?'#fff':'var(--text)')+';border:1px solid var(--border);">'+txt+'</div>';
+ const l=document.getElementById('log');l.appendChild(d);l.scrollTop=l.scrollHeight;}
+function ask(){const q=document.getElementById('q');if(!q.value.trim())return;
+ push('me',q.value);const a=bot(q.value);q.value='';setTimeout(()=>push('bot',a),300);}
+push('bot','أهلاً! أنا Emaar AI. اسألني: احسب 12*8، كم الساعة، أو ما الأداة المناسبة لك.');
+</script>
+</body>
+</html>
