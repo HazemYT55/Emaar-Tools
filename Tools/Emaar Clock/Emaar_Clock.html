@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Clock - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">⏱️</span>
+<div><h1>Emaar Clock</h1><p>ساعة ومؤقت وساعة إيقاف</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card" style="text-align:center;">
+<div id="clock" style="font-size:56px;font-weight:700;color:var(--primary);direction:ltr;"></div>
+<div id="date" style="color:var(--muted);margin-top:4px;"></div></div>
+<div class="card"><h2>المؤقت</h2>
+<div class="row">
+<div><label>دقائق</label><input type="number" id="tmin" value="5" min="0"></div>
+<div><label>ثواني</label><input type="number" id="tsec" value="0" min="0" max="59"></div>
+<div style="flex:0"><button class="btn" onclick="startTimer()"><i class="ph ph-play"></i> بدء</button></div>
+<div style="flex:0"><button class="btn gray" onclick="stopTimer()">إيقاف</button></div>
+</div>
+<div id="tleft" style="font-size:36px;font-weight:700;text-align:center;margin-top:12px;direction:ltr;">--:--</div></div>
+<div class="card"><h2>ساعة الإيقاف</h2>
+<div id="sw" style="font-size:36px;font-weight:700;text-align:center;direction:ltr;">00:00.0</div>
+<div class="row" style="justify-content:center;margin-top:10px;">
+<div style="flex:0"><button class="btn" id="swbtn" onclick="swToggle()"><i class="ph ph-play"></i> بدء</button></div>
+<div style="flex:0"><button class="btn gray" onclick="swLap()">لفة</button></div>
+<div style="flex:0"><button class="btn red" onclick="swReset()">تصفير</button></div>
+</div><div id="laps" style="margin-top:10px;"></div></div>
+
+</main>
+<script>
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('en-GB');
+ document.getElementById('date').textContent=n.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+tick();setInterval(tick,1000);
+let tInt=null,left=0;
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function startTimer(){stopTimer();left=(+document.getElementById('tmin').value)*60+(+document.getElementById('tsec').value);
+ document.getElementById('tleft').textContent=fmt(left);
+ tInt=setInterval(()=>{left--;document.getElementById('tleft').textContent=fmt(Math.max(left,0));
+  if(left<=0){stopTimer();beep();alert('انتهى المؤقت!');}},1000);}
+function stopTimer(){if(tInt)clearInterval(tInt);tInt=null;}
+function beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,300,600].forEach(d=>{const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.setValueAtTime(0.3,ctx.currentTime+d/1000);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d/1000+0.25);o.start(ctx.currentTime+d/1000);o.stop(ctx.currentTime+d/1000+0.3);});}catch(e){}}
+let swRun=false,swStart=0,swAcc=0,swInt=null;
+function swFmt(ms){const m=Math.floor(ms/60000),s=Math.floor(ms/1000)%60,t=Math.floor(ms/100)%10;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+t;}
+function swToggle(){swRun=!swRun;document.getElementById('swbtn').innerHTML=swRun?'<i class="ph ph-pause"></i> إيقاف مؤقت':'<i class="ph ph-play"></i> بدء';
+ if(swRun){swStart=Date.now();swInt=setInterval(()=>{document.getElementById('sw').textContent=swFmt(swAcc+Date.now()-swStart);},100);}
+ else{swAcc+=Date.now()-swStart;clearInterval(swInt);}}
+function swLap(){if(!swRun&&!swAcc)return;const ms=swAcc+(swRun?Date.now()-swStart:0);const d=document.createElement('div');d.style.cssText='padding:6px;border-bottom:1px solid var(--border);direction:ltr;text-align:center;';d.textContent=swFmt(ms);document.getElementById('laps').prepend(d);}
+function swReset(){swRun=false;swAcc=0;clearInterval(swInt);document.getElementById('sw').textContent='00:00.0';document.getElementById('swbtn').innerHTML='<i class="ph ph-play"></i> بدء';document.getElementById('laps').innerHTML='';}
+</script>
+</body>
+</html>
