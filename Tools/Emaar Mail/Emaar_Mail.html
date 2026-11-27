@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Mail - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">📧</span>
+<div><h1>Emaar Mail</h1><p>بريد داخلي محلي</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card">
+<p class="note" style="margin-bottom:10px;">صندوق بريد تجريبي يعمل على هذا الجهاز فقط: رتّب أفكارك ورسائلك لنفسك. لا يُرسل بريداً حقيقياً.</p>
+<button class="btn" onclick="document.getElementById('compose').style.display='block'"><i class="ph ph-pencil-line"></i> رسالة جديدة</button>
+</div>
+<div class="card" id="compose" style="display:none;"><h2>رسالة جديدة</h2>
+<label>الموضوع</label><input type="text" id="msub">
+<label style="margin-top:8px;">النص</label><textarea id="mbody" rows="4"></textarea>
+<button class="btn gold" style="margin-top:10px;" onclick="sendMail()"><i class="ph ph-paper-plane-right"></i> حفظ في الصندوق</button>
+</div>
+<div class="card"><h2>الوارد (<span id="cnt">0</span>)</h2><div id="inbox"></div></div>
+
+</main>
+<script>
+let mails=JSON.parse(localStorage.getItem('et_mail')||'[]');
+function save(){localStorage.setItem('et_mail',JSON.stringify(mails));}
+function sendMail(){const s=document.getElementById('msub').value.trim();if(!s)return alert('اكتب موضوعاً');
+ mails.unshift({s,b:document.getElementById('mbody').value,d:new Date().toLocaleString('ar-EG')});
+ document.getElementById('msub').value='';document.getElementById('mbody').value='';
+ document.getElementById('compose').style.display='none';save();render();}
+function render(){document.getElementById('cnt').textContent=mails.length;
+ const l=document.getElementById('inbox');l.innerHTML='';
+ mails.forEach((m,i)=>{const d=document.createElement('details');d.style.cssText='border-bottom:1px solid var(--border);padding:8px 0;';
+  d.innerHTML='<summary style="cursor:pointer;font-size:14px;"><strong>'+m.s+'</strong> <span style="color:var(--muted);font-size:12px;">'+m.d+'</span></summary><p style="padding:10px;white-space:pre-wrap;font-size:14px;">'+m.b+'</p>';
+  const del=document.createElement('button');del.className='btn red';del.style.padding='4px 10px';del.textContent='حذف';
+  del.onclick=ev=>{ev.preventDefault();mails.splice(i,1);save();render();};
+  d.appendChild(del);l.appendChild(d);});
+ if(!mails.length)l.innerHTML='<p class="note">الصندوق فارغ.</p>';}
+render();
+</script>
+</body>
+</html>
