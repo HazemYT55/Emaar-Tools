@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar PDF - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">📄</span>
+<div><h1>Emaar PDF</h1><p>تحويل الصور إلى ملف PDF</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card">
+<button class="btn" onclick="document.getElementById('imgs').click()"><i class="ph ph-images"></i> اختيار صور</button>
+<input type="file" id="imgs" accept="image/*" multiple style="display:none" onchange="addImgs(event)">
+<div id="list" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;"></div>
+</div>
+<div class="card" style="text-align:center;">
+<button class="btn gold" onclick="makePdf()"><i class="ph ph-file-pdf"></i> إنشاء PDF</button>
+<p class="note" id="cdnerr" style="display:none;color:#ef4444;">تعذر تحميل مكتبة PDF من الإنترنت. تحقق من الاتصال وأعد فتح الصفحة.</p>
+<p class="note">التحويل يتم على جهازك، ولا تُرفع الصور لأي خادم.</p>
+</div>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="document.getElementById('cdnerr').style.display='block'"></script>
+<script>
+let files=[];
+function addImgs(e){files=files.concat(Array.from(e.target.files));render();}
+function render(){const l=document.getElementById('list');l.innerHTML='';
+ files.forEach((f,i)=>{const d=document.createElement('div');d.style.cssText='position:relative;';
+  const img=document.createElement('img');img.src=URL.createObjectURL(f);
+  img.style.cssText='width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--border);';
+  const x=document.createElement('button');x.textContent='✕';
+  x.style.cssText='position:absolute;top:-6px;left:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;';
+  x.onclick=()=>{files.splice(i,1);render();};
+  d.appendChild(img);d.appendChild(x);l.appendChild(d);});}
+async function makePdf(){
+ if(!files.length)return alert('اختر صوراً أولاً');
+ if(!window.jspdf)return alert('مكتبة PDF لم تُحمّل. تحقق من الإنترنت.');
+ const {jsPDF}=window.jspdf;const doc=new jsPDF();
+ for(let i=0;i<files.length;i++){
+  const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(files[i]);});
+  const img=await new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.src=dataUrl;});
+  if(i>0)doc.addPage();
+  const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight();
+  const m=10,aw=pw-2*m,ah=ph-2*m;
+  const s=Math.min(aw/img.width,ah/img.height);
+  doc.addImage(dataUrl,'JPEG',m+(aw-img.width*s)/2,m+(ah-img.height*s)/2,img.width*s,img.height*s);}
+ doc.save('emaar-images.pdf');}
+</script>
+</body>
+</html>
