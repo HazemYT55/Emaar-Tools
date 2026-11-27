@@ -1,93 +1,129 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emaar Calendar - Emaar Tools</title>
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
-<style>
-:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
-body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-header .ic{font-size:26px;}
-header h1{font-size:19px;font-weight:600;}
-header p{font-size:12px;opacity:.85;}
-.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
-.back:hover{background:rgba(255,255,255,.3);}
-main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
-.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
-.btn:hover{background:var(--primary2);}
-.btn.gold{background:var(--gold);color:#3b2f00;}
-.btn.gray{background:#e2e8f0;color:var(--text);}
-.btn.red{background:#ef4444;}
-input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
-input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
-.row>*{flex:1;min-width:120px;}
-.note{font-size:12px;color:var(--muted);margin-top:8px;}
-h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
-</style>
+  <meta charset="UTF-8"><title>Emaar Calendar - التقويم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+  <style>
+    :root { --primary: #0f4c81; --bg: #f4f7f9; --surface: #fff; --border: #e2e8f0; }
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+    .top-bar { background: var(--surface); padding: 15px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); color: var(--primary); font-size: 20px; font-weight: 700; }
+    .main { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; }
+    .calendar-box { flex: 2; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header h2 { color: var(--primary); }
+    .btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; }
+    .day-name { text-align: center; font-weight: 700; color: var(--primary); padding: 10px; }
+    .day { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer; position: relative; display: flex; flex-direction: column; align-items: center; }
+    .day:hover { background: #e0f2fe; }
+    .day.today { background: #e0f2fe; border-color: var(--primary); }
+    .day-num { font-weight: bold; font-size: 16px; }
+    .event-dot { width: 6px; height: 6px; background: red; border-radius: 50%; margin-top: 5px; }
+    .sidebar { flex: 1; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar h3 { margin-bottom: 15px; color: var(--primary); }
+    input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Cairo'; }
+  </style>
 </head>
 <body>
-<header>
-<span class="ic">📅</span>
-<div><h1>Emaar Calendar</h1><p>تقويم ومواعيد</p></div>
-<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
-</header>
-<main>
+  <div class="top-bar"><i class="ph ph-calendar"></i> تقويم إعمار (Emaar Calendar)</div>
+  <div class="main">
+    <div class="calendar-box">
+      <div class="header">
+        <button class="btn" onclick="prevMonth()">السابق</button>
+        <h2 id="month-display">يناير 2026</h2>
+        <button class="btn" onclick="nextMonth()">التالي</button>
+      </div>
+      <div class="grid" id="calendar-grid">
+        <!-- Days injected by JS -->
+      </div>
+    </div>
+    <div class="sidebar">
+      <h3 id="selected-date">اختر يوماً</h3>
+      <input type="text" id="event-title" placeholder="اسم الحدث/المناسبة...">
+      <button class="btn" onclick="addEvent()">إضافة حدث</button>
+      <div id="events-list" style="margin-top: 20px;">
+        <!-- Events injected by JS -->
+      </div>
+    </div>
+  </div>
+  <script>
+    let currentDate = new Date();
+    let selectedDateStr = "";
+    let events = JSON.parse(localStorage.getItem('emaarCalEvents')) || {};
 
-<div class="card">
-<div class="row" style="align-items:center;margin-bottom:12px;">
-<button class="btn gray" onclick="mv(1)">‹ السابق</button>
-<h2 id="mtitle" style="flex:2;text-align:center;margin:0;"></h2>
-<button class="btn gray" onclick="mv(-1)">التالي ›</button>
-</div>
-<div id="grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
-</div>
-<div class="card"><h2 id="dtitle">اختر يوماً لإضافة موعد</h2>
-<div id="evlist"></div>
-<div class="row" id="addrow" style="display:none;margin-top:10px;">
-<div style="flex:2"><label>الموعد</label><input type="text" id="evtext" placeholder="مثال: مذاكرة الرياضيات"></div>
-<div><label>الوقت</label><input type="time" id="evtime"></div>
-<div style="flex:0"><button class="btn" onclick="addEv()"><i class="ph ph-plus"></i> إضافة</button></div>
-</div></div>
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      document.getElementById('month-display').innerText = currentDate.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+      
+      const daysAr = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+      daysAr.forEach(d => grid.innerHTML += `<div class="day-name">${d}</div>`);
 
-</main>
-<script>
-let cur=new Date(),sel=null;
-const store=JSON.parse(localStorage.getItem('et_cal')||'{}');
-const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-const days=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
-function key(y,m,d){return y+'-'+(m+1)+'-'+d;}
-function render(){
- document.getElementById('mtitle').textContent=months[cur.getMonth()]+' '+cur.getFullYear();
- const g=document.getElementById('grid');g.innerHTML='';
- days.forEach(d=>{const h=document.createElement('div');h.style.cssText='text-align:center;font-size:12px;color:var(--muted);font-weight:700;';h.textContent=d;g.appendChild(h);});
- const first=new Date(cur.getFullYear(),cur.getMonth(),1).getDay();
- const n=new Date(cur.getFullYear(),cur.getMonth()+1,0).getDate();
- for(let i=0;i<first;i++)g.appendChild(document.createElement('div'));
- const today=new Date();
- for(let d=1;d<=n;d++){
-  const c=document.createElement('button');const k=key(cur.getFullYear(),cur.getMonth(),d);
-  const hasEv=(store[k]||[]).length>0;
-  const isToday=d===today.getDate()&&cur.getMonth()===today.getMonth()&&cur.getFullYear()===today.getFullYear();
-  c.style.cssText='padding:10px 4px;border-radius:8px;border:1px solid var(--border);background:'+(sel===k?'var(--primary)':isToday?'#e0f2fe':'#fff')+';color:'+(sel===k?'#fff':'var(--text)')+';cursor:pointer;font-size:14px;';
-  c.innerHTML=d+(hasEv?' <span style="color:'+(sel===k?'#fff':'var(--gold)')+'">●</span>':'');
-  c.onclick=()=>selectDay(k,d);g.appendChild(c);}
- renderEv();}
-function selectDay(k,d){sel=k;document.getElementById('dtitle').textContent='مواعيد '+d+' '+months[cur.getMonth()];document.getElementById('addrow').style.display='flex';render();}
-function renderEv(){const l=document.getElementById('evlist');l.innerHTML='';
- (store[sel]||[]).forEach((e,i)=>{const r=document.createElement('div');r.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid var(--border);';
-  r.innerHTML='<span>'+(e.t?e.t+' — ':'')+e.x+'</span>';const b=document.createElement('button');b.className='btn red';b.style.padding='4px 10px';b.textContent='حذف';
-  b.onclick=()=>{store[sel].splice(i,1);save();render();};r.appendChild(b);l.appendChild(r);});}
-function addEv(){const x=document.getElementById('evtext').value.trim();if(!x||!sel)return;
- (store[sel]=store[sel]||[]).push({x,t:document.getElementById('evtime').value});document.getElementById('evtext').value='';save();render();}
-function save(){localStorage.setItem('et_cal',JSON.stringify(store));}
-function mv(d){cur.setMonth(cur.getMonth()+d);render();}
-render();
-</script>
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dStr = `${year}-${month + 1}-${i}`;
+        const isToday = new Date().toDateString() === new Date(year, month, i).toDateString();
+        const hasEvents = events[dStr] && events[dStr].length > 0;
+        
+        grid.innerHTML += `
+          <div class="day ${isToday ? 'today' : ''}" onclick="selectDay('${dStr}')">
+            <span class="day-num">${i}</span>
+            ${hasEvents ? '<div class="event-dot"></div>' : ''}
+          </div>
+        `;
+      }
+    }
+
+    function selectDay(dStr) {
+      selectedDateStr = dStr;
+      document.getElementById('selected-date').innerText = `أحداث يوم: ${dStr}`;
+      renderEvents();
+    }
+
+    function addEvent() {
+      if (!selectedDateStr) return alert('اختر يوماً أولاً');
+      const title = document.getElementById('event-title').value.trim();
+      if (!title) return;
+      if (!events[selectedDateStr]) events[selectedDateStr] = [];
+      events[selectedDateStr].push(title);
+      localStorage.setItem('emaarCalEvents', JSON.stringify(events));
+      document.getElementById('event-title').value = '';
+      renderCalendar();
+      renderEvents();
+    }
+
+    function renderEvents() {
+      const list = document.getElementById('events-list');
+      list.innerHTML = '';
+      if (events[selectedDateStr]) {
+        events[selectedDateStr].forEach((ev, i) => {
+          list.innerHTML += `<div style="padding:10px; background:#f1f5f9; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between;">
+            <span>${ev}</span>
+            <button onclick="deleteEvent(${i})" style="color:red; border:none; background:none; cursor:pointer;">✕</button>
+          </div>`;
+        });
+      }
+    }
+
+    function deleteEvent(idx) {
+      events[selectedDateStr].splice(idx, 1);
+      localStorage.setItem('emaarCalEvents', JSON.stringify(events));
+      renderCalendar();
+      renderEvents();
+    }
+
+    function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
+    function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
+
+    renderCalendar();
+  </script>
 </body>
 </html>
