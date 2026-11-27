@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emaar Notes - Emaar Tools</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web/src/regular/style.css">
+<style>
+:root{--primary:#0f4c81;--primary2:#1e3a8a;--gold:#d4af37;--bg:#f4f7f9;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+header .ic{font-size:26px;}
+header h1{font-size:19px;font-weight:600;}
+header p{font-size:12px;opacity:.85;}
+.back{margin-right:auto;color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:7px 14px;border-radius:8px;font-size:13px;}
+.back:hover{background:rgba(255,255,255,.3);}
+main{flex:1;padding:20px;max-width:1100px;width:100%;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.btn{background:var(--primary);color:#fff;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--primary2);}
+.btn.gold{background:var(--gold);color:#3b2f00;}
+.btn.gray{background:#e2e8f0;color:var(--text);}
+.btn.red{background:#ef4444;}
+input[type=text],input[type=number],input[type=url],input[type=time],input[type=date],textarea,select{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;color:var(--text);width:100%;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--primary);border-color:transparent;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;}
+.row>*{flex:1;min-width:120px;}
+.note{font-size:12px;color:var(--muted);margin-top:8px;}
+h2{font-size:16px;margin-bottom:10px;color:var(--primary);}
+</style>
+</head>
+<body>
+<header>
+<span class="ic">🗒️</span>
+<div><h1>Emaar Notes</h1><p>ملاحظات لاصقة</p></div>
+<a class="back" href="../../index.html"><i class="ph ph-house"></i> الرئيسية</a>
+</header>
+<main>
+
+<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+<button class="btn" onclick="addNote()"><i class="ph ph-plus"></i> ملاحظة جديدة</button>
+<span style="font-size:13px;color:var(--muted);">اختر لون الملاحظة التالية:</span>
+<span id="pal"></span>
+</div>
+<div id="board" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
+
+</main>
+<script>
+let notes=JSON.parse(localStorage.getItem('et_notes')||'[]');
+let color='#fef08a';
+const colors=['#fef08a','#bbf7d0','#bfdbfe','#fecaca','#e9d5ff','#fed7aa'];
+const pal=document.getElementById('pal');
+colors.forEach(c=>{const s=document.createElement('span');
+ s.style.cssText='width:26px;height:26px;border-radius:50%;background:'+c+';display:inline-block;cursor:pointer;border:2px solid '+(c===color?'var(--primary)':'transparent')+';';
+ s.onclick=()=>{color=c;render();};pal.appendChild(s);});
+function save(){localStorage.setItem('et_notes',JSON.stringify(notes));}
+function addNote(){notes.unshift({t:'',c:color});save();render();}
+function render(){const b=document.getElementById('board');b.innerHTML='';
+ notes.forEach((n,i)=>{const d=document.createElement('div');
+  d.style.cssText='background:'+n.c+';border-radius:10px;padding:12px;min-height:140px;box-shadow:0 3px 8px rgba(0,0,0,.12);position:relative;';
+  const ta=document.createElement('textarea');ta.value=n.t;ta.placeholder='اكتب ملاحظتك...';
+  ta.style.cssText='width:100%;height:100px;background:transparent;border:none;resize:none;font-size:14px;color:#334155;';
+  ta.oninput=()=>{n.t=ta.value;save();};
+  const del=document.createElement('button');del.textContent='✕';
+  del.style.cssText='position:absolute;top:6px;left:8px;background:none;border:none;cursor:pointer;color:#64748b;font-size:14px;';
+  del.onclick=()=>{notes.splice(i,1);save();render();};
+  d.appendChild(del);d.appendChild(ta);b.appendChild(d);});
+ if(!notes.length)b.innerHTML='<p class="note">لا ملاحظات بعد. أضف أول ملاحظة من الأعلى.</p>';}
+render();
+</script>
+</body>
+</html>
